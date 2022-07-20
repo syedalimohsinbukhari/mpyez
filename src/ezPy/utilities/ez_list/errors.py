@@ -9,3 +9,15 @@ class EzListErrs(Exception):
 
 class AlphabetFound(EzListErrs):
     pass
+
+
+class IndexOutOfList(EzListErrs):
+    pass
+
+
+class UnequalElements(EzListErrs):
+    pass
+
+
+class GotAnUnknownValue(EzListErrs):
+    pass
