@@ -6,9 +6,9 @@ import os
 from typing import Union
 
 try:
-    from super_classes.ez_os_.get_files import GetFiles
+    from utilities.ez_os.get_files import GetFiles
 except ImportError:
-    from .super_classes.ez_os_.get_files import GetFiles
+    from .utilities.ez_os.get_files import GetFiles
 
 
 class ListOfFilesFromExtensions(GetFiles):
