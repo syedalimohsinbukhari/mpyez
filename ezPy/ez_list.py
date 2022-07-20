@@ -56,12 +56,26 @@ def join_lists(lists, get_unique=False, sort=False):
     for _list in lists:
         _temp.extend(_list)
 
+    mask1_ = [i for i, v in enumerate(_temp) if type(v) == list]
+
+    if mask1_:
+        for x in mask1_:
+            _temp[x] = tuple(_temp[x])
+
     # taken from https://stackoverflow.com/a/58666031/3212945
     if get_unique:
         unique_ = set()
         _temp = [x for x in _temp if not (x in unique_ or unique_.add(x))]
 
     if sort:
-        _temp = sorted(_temp)
+        try:
+            _temp = sorted(_temp)
+        except TypeError:
+            n_types = list(set([type(x) for x in _temp]))
+            mask2_ = [[index for index, value in enumerate(_temp) if type(value) == types_] for
+                      types_ in n_types]
+
+            _temp = [sorted(x) for x in [[_temp[y] for y in z] for z in mask2_]]
+            _temp = nested_list_to_list(_temp)
 
     return _temp
