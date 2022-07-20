@@ -128,3 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .idea/
+
+# testing files
+/ezPy/main.py
