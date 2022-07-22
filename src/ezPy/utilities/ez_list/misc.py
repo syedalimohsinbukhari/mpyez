@@ -1,20 +1,24 @@
 """
 Created on Jul 20 21:45:16 2022
 """
+
 import copy
 from itertools import compress
 
-from src.ezPy.utilities.ez_list import errors
+try:
+    from . import errors
+except ImportError:
+    import errors
 
 
-def convert_inputs_to_lists(input1, input2):
-    if not isinstance(input1, list):
-        input1 = [input1]
+def convert_inputs_to_lists(primary_list, secondary_list):
+    if not isinstance(primary_list, list):
+        primary_list = [primary_list]
 
-    if not isinstance(input2, list):
-        input2 = [input2]
+    if not isinstance(secondary_list, list):
+        secondary_list = [secondary_list]
 
-    return input1, input2
+    return primary_list, secondary_list
 
 
 def equalizing_list_length(primary_list, secondary_list, names):
