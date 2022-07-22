@@ -1,6 +1,4 @@
-"""
-Created on Jul 18 23:26:48 2022
-"""
+"""Created on Jul 18 23:26:48 2022."""
 
 import os
 from typing import Union

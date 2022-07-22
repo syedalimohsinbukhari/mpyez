@@ -21,3 +21,11 @@ class UnequalElements(EzListErrs):
 
 class GotAnUnknownValue(EzListErrs):
     pass
+
+
+class ChildListLengthError(EzListErrs):
+    pass
+
+
+class StringNotPassed(EzListErrs):
+    pass

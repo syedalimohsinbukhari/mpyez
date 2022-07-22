@@ -1,9 +1,9 @@
-"""
-Created on Jul 20 11:54:27 2022
-"""
+"""Created on Jul 20 11:54:27 2022."""
 
-import copy
+from copy import deepcopy
 from itertools import chain, compress
+from re import search
+from typing import Any, List, Union
 
 try:
     from .utilities.ez_list import errors, misc
@@ -11,81 +11,269 @@ except ImportError:
     from utilities.ez_list import errors, misc
 
 
-def is_alphabet(input_):
-    try:
-        if int(input_):
-            return False
-    except ValueError:
-        return True
+def is_alphabet(input_: Any) -> bool:
+    """
+    Check if the given input is an alphabet or not.
+
+    Parameters
+    ----------
+    input_ : Any
+        The input string to be checked
+
+    Returns
+    -------
+    bool
+        ``True`` if the input_ is string, else ``False``.
+
+    Examples
+    --------
+    Let's say we have
+
+    >>> a = 'A'
+
+    as an input, and we want to check whether it is alphabet or not,
+
+    >>> is_alphabet(a)
+    >>> True
+
+    However, if
+
+    >>> a = 1
+
+    >>> is_alphabet(a)
+    >>> False
+    """
+    if not isinstance(input_, str):
+        input_ = str(input_)
+
+    return True if search(r'[A-Za-z]', input_) is not None else False
 
 
-def is_numeric(input_):
-    if isinstance(input_, int or float):
-        return True
-    else:
-        return False
+def is_numeric(input_: Any) -> bool:
+    """
+    Check whether the input is numeric or not.
+
+    Parameters
+    ----------
+    input_ : Any
+        Input to be checked.
+
+    Returns
+    -------
+    bool
+        ``True`` of ``False`` depending upon the input being numeric or not.
+
+    Examples
+    --------
+    Let's say we have
+
+    >>> a = 1
+
+    and we want to check whether the varaible is numeric or not,
+
+    >>> is_numeric(a)
+    >>> True
+    """
+    return True if isinstance(input_, int or float) else False
 
 
-def numeric_list_to_string(num_list):
+def numeric_list_to_string(num_list: List[int]) -> List[str]:
+    """
+    Convert all elements of a numeric lists to string.
+
+    Parameters
+    ----------
+    num_list : List[int]
+        A list containing numeric values.
+
+    Returns
+    -------
+    List[str]
+        A list containing strings equivalent to the numbers in the input list.
+
+    Examples
+    --------
+    Let's say we have
+
+    >>> a = [1, 2, 3, 4, 5]
+
+    and we want to convert each element in thist list to string,
+
+    >>> numeric_list_to_string(a)
+    >>> ['1', '2', '3', '4', '5']
+    """
     return list(map(str, num_list))
 
 
-def string_list_to_numeric(str_list):
-    mask_ = [is_alphabet(x) for x in str_list]
+def string_list_to_numeric(str_list: list) -> list:
+    """
+    Convert all elements of a string lists to numeric.
 
-    if False not in mask_:
-        ret_ = list(map(str, str_list))
-    else:
-        raise errors.AlphabetFound(f'Alphabet found in the list passed, '
-                                   f'{", ".join(compress(str_list, mask_))} cannot be processed.')
+    Parameters
+    ----------
+    str_list : list
+        A list containing string elements.
 
-    return ret_
+    Raises
+    ------
+    errors.AlphabetFound
+        This error is raised when the string is alphabetical in nature and not numerical.
+
+    Returns
+    -------
+    list
+        A list containing numeric elements.
+    """
+    mask_ = [is_alphabet(element) for element in str_list]
+
+    if any(mask_):
+        raise errors.AlphabetFound(f'An alphabet found in the list passed, {", ".join(compress(str_list, mask_))} '
+                                   f'cannot be processed.')
+
+    return list(map(str, str_list))
 
 
-def nested_list_to_list(nested_list):
+def nested_list_to_list(nested_list: List[list]) -> list:
+    """
+    Convert nested list to a single list.
+
+    Parameters
+    ----------
+    nested_list : List[list]
+        An even/uneven nested list.
+
+    Returns
+    -------
+    list
+        A 1D list.
+
+    Examples
+    --------
+    To convert
+
+    >>> a = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+    to a simple 1D list,
+
+    >>> nested_list_to_list(a)
+    >>> [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    Uneven lists can also be converted to 1D lists,
+
+    >>> a = [[1, 2, 3], [4, 5], [6]]
+    >>> nested_list_to_list(a)
+    >>> [1, 2, 3, 4, 5, 6]
+    """
     return list(chain.from_iterable(nested_list))
 
 
-def list_to_nested_list(input_list, n_elements):
+def list_to_nested_list(input_list: list, n_elements: int) -> List[list]:
+    """
+    Convert a single list to nested list.
+
+    Parameters
+    ----------
+    input_list : list
+        A simple, single list.
+    n_elements : int
+        Number of elements in each list.
+
+    Returns
+    -------
+    List[list]
+        A nested list with the n_elements per inner list.
+
+    Notes
+    -----
+    For lists with,
+
+    >>> len(list) % n_elements > 0
+
+    the number of elements in the last inner list will not match the rest.
+
+    Examples
+    --------
+    To convert,
+
+    >>> a = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    into a nested list with 3 elements per list,
+
+    >>> list_to_nested_list(a, 3)
+    >>> [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+    Similarly, for the nested list to have four elements per inner list,
+
+    >>> list_to_nested_list(a, 4)
+    >>> [[1, 2, 3, 4], [5, 6, 7, 8], [9]]
+    """
+
     return [input_list[i:i + n_elements] for i in range(0, len(input_list), n_elements)]
 
 
-def join_lists(lists, get_unique=False, sort=False):
-    _temp = []
+def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = False,
+               tuples_as_lists: bool = False) -> List[Any]:
+    """
+    Joins two or more lists.
 
-    for _list in lists:
-        _temp.extend(_list)
+    Parameters
+    ----------
+    input_lists : List[Any]
+        A nested list with lists, tuples, ints, or floats in it.
+    get_unique: bool
+        Whether the output should contain unique values or not. The default if False.
+    sort : bool
+        Whether the output should be sorted or not. The default is False.
+    tuples_as_lists : bool
+        Whether the tuples in output should be converted to list or not. The default is False.
 
-    mask1 = [i for i, v in enumerate(_temp) if type(v) == list]
+    Returns
+    -------
+    List[Any]
+        A merger of all the input lists.
+    """
+    # taken from https://www.geeksforgeeks.org/extending-list-python-5-different-ways/
+    out_list = list(chain([], *input_lists))
 
+    # get indices of all list elements with type == list
+    mask1 = [i for i, v in enumerate(out_list) if type(v) == list]
+
+    # change the values at mask1 indices from lists to tuples
     if mask1:
-        for x in mask1:
-            _temp[x] = tuple(_temp[x])
+        for value in mask1:
+            out_list[value] = tuple(out_list[value])
 
     # taken from https://stackoverflow.com/a/58666031/3212945
     if get_unique:
-        unique_ = set()
-        _temp = [x for x in _temp if not (x in unique_ or unique_.add(x))]
+        unique = set()
+        out_list = [value for value in out_list if not (value in unique or unique.add(value))]
 
     if sort:
         try:
-            _temp = sorted(_temp)
+            out_list = sorted(out_list)
         except TypeError:
-            n_types = list(set([type(x) for x in _temp]))
-            mask2 = [[index for index, value in enumerate(_temp) if type(value) == types_] for
-                     types_ in n_types]
+            n_types = list(set([type(element) for element in out_list]))
+            mask2 = [[index for index, value in enumerate(out_list) if isinstance(value, types)] for types in n_types]
 
-            _temp = [sorted(x) for x in [[_temp[y] for y in z] for z in mask2]]
-            _temp = nested_list_to_list(_temp)
+            out_list = [sorted(element) for element in [[out_list[value] for value in index] for index in mask2]]
+            out_list = nested_list_to_list(out_list)
 
-    return _temp
+    if tuples_as_lists:
+        for index, _ in enumerate(out_list):
+            try:
+                out_list[index] = list(out_list[index])
+            except TypeError:
+                break
+
+    return out_list
 
 
 class Replace:
 
-    def __init__(self, input_list, work_on, replace_with, by='index', new_list=False):
+    def __init__(self, input_list: list, work_on: Union[list, int], replace_with: Union[list, int], by: str = 'index',
+                 new_list: list = False):
         if new_list:
-            self.input_list = copy.deepcopy(input_list)
+            self.input_list = deepcopy(input_list)
         else:
             self.input_list = input_list
         self.work_on = work_on
@@ -101,7 +289,7 @@ class Replace:
 
         return self.work_on, self.replace_with
 
-    def __equalizing_list_length(self):
+    def __equalizing_list_length(self) -> list:
         if self.by == 'index':
             names = ['index', 'value']
         else:
@@ -119,13 +307,13 @@ class Replace:
 
         return self.replace_with
 
-    def __replace_values(self, primary_list=None):
+    def __replace_values(self, primary_list=None) -> None:
         primary_list = self.work_on if primary_list is None else primary_list
 
         for index_, value_ in zip(primary_list, self.replace_with):
             self.input_list[index_] = value_
 
-    def at_index(self):
+    def at_index(self) -> list:
         self.work_on, self.replace_with = self.__convert_inputs_to_lists()
         self.replace_with = self.__equalizing_list_length()
 
@@ -140,11 +328,11 @@ class Replace:
 
         return self.input_list
 
-    def at_value(self):
+    def at_value(self) -> list:
         self.work_on, self.replace_with = self.__convert_inputs_to_lists()
         self.replace_with = self.__equalizing_list_length()
 
-        bool_mask = [x not in self.input_list for x in self.work_on]
+        bool_mask = [element not in self.input_list for element in self.work_on]
 
         if True in bool_mask:
             join_ = ", ".join(compress(numeric_list_to_string(self.work_on), bool_mask))
@@ -156,3 +344,7 @@ class Replace:
         self.__replace_values(primary_list=index)
 
         return self.input_list
+
+
+def is_contained(child_list: list, parent_list: list) -> bool:
+    return True if all([child in parent_list for child in child_list]) else False
