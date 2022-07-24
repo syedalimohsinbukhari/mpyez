@@ -1,3 +1,4 @@
+.gitignore
 setup.cfg
 README.md
 setup.py

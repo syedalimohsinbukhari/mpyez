@@ -2,79 +2,14 @@
 
 from copy import deepcopy
 from itertools import chain, compress
-from re import search
 from typing import Any, List, Union
 
 try:
-    from .utilities.ez_list import errors, misc
+    from .ez_misc import is_alphabet as _is_alphabet
+    from .utilities.ez_os import errors as _errors, utilities as _utilities
 except ImportError:
-    from utilities.ez_list import errors, misc
-
-
-def is_alphabet(input_: Any) -> bool:
-    """
-    Check if the given input is an alphabet or not.
-
-    Parameters
-    ----------
-    input_ : Any
-        The input string to be checked
-
-    Returns
-    -------
-    bool
-        ``True`` if the input_ is string, else ``False``.
-
-    Examples
-    --------
-    Let's say we have
-
-    >>> a = 'A'
-
-    as an input, and we want to check whether it is alphabet or not,
-
-    >>> is_alphabet(a)
-    >>> True
-
-    However, if
-
-    >>> a = 1
-
-    >>> is_alphabet(a)
-    >>> False
-    """
-    if not isinstance(input_, str):
-        input_ = str(input_)
-
-    return True if search(r'[A-Za-z]', input_) is not None else False
-
-
-def is_numeric(input_: Any) -> bool:
-    """
-    Check whether the input is numeric or not.
-
-    Parameters
-    ----------
-    input_ : Any
-        Input to be checked.
-
-    Returns
-    -------
-    bool
-        ``True`` of ``False`` depending upon the input being numeric or not.
-
-    Examples
-    --------
-    Let's say we have
-
-    >>> a = 1
-
-    and we want to check whether the varaible is numeric or not,
-
-    >>> is_numeric(a)
-    >>> True
-    """
-    return True if isinstance(input_, int or float) else False
+    from ez_misc import is_alphabet as _is_alphabet
+    from utilities.ez_list import errors as _errors, utilities as _utilities
 
 
 def numeric_list_to_string(num_list: List[int]) -> List[str]:
@@ -124,11 +59,11 @@ def string_list_to_numeric(str_list: list) -> list:
     list
         A list containing numeric elements.
     """
-    mask_ = [is_alphabet(element) for element in str_list]
+    mask_ = [_is_alphabet(element) for element in str_list]
 
     if any(mask_):
-        raise errors.AlphabetFound(f'An alphabet found in the list passed, '
-                                   f'{", ".join(compress(str_list, mask_))} cannot be processed.')
+        raise _errors.AlphabetFound(f'An alphabet found in the list passed, '
+                                    f'{", ".join(compress(str_list, mask_))} cannot be processed.')
 
     return list(map(str, str_list))
 
@@ -295,9 +230,9 @@ class Replace:
             names = ['old_elements', 'new_elements']
 
         if len(self.replace_with) > len(self.work_on):
-            raise errors.UnequalElements(f'The number of elements in the {names[0]} list is '
-                                         f'greater than that of {names[1]}. Cannot perform '
-                                         f'replacement in this case.')
+            raise _errors.UnequalElements(f'The number of elements in the {names[0]} list is '
+                                          f'greater than that of {names[1]}. Cannot perform '
+                                          f'replacement in this case.')
         elif len(self.replace_with) < len(self.work_on):
             diff = len(self.work_on) - len(self.replace_with)
             self.replace_with = self.replace_with * (diff + 1)
@@ -320,8 +255,8 @@ class Replace:
 
         if any(bool_mask):
             join_ = ", ".join(compress(numeric_list_to_string(self.replace_with), bool_mask))
-            raise errors.IndexOutOfList(f'Index {join_} is out of bound for a list of length '
-                                        f'{len(self.input_list)}.')
+            raise _errors.IndexOutOfList(f'Index {join_} is out of bound for a list of length '
+                                         f'{len(self.input_list)}.')
 
         self.__replace_values()
 
@@ -335,8 +270,8 @@ class Replace:
 
         if any(bool_mask):
             join_ = ", ".join(compress(numeric_list_to_string(self.work_on), bool_mask))
-            raise errors.GotAnUnknownValue(f'The value {join_} given in old_element does not exist '
-                                           f'in the input_list.')
+            raise _errors.GotAnUnknownValue(f'The value {join_} given in old_element does not '
+                                            f'exist in the input_list.')
 
         index = [self.input_list.index(element) for element in self.work_on]
 

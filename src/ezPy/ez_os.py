@@ -4,12 +4,12 @@ import os
 from typing import Union
 
 try:
-    from utilities.ez_os.get_files import GetFiles
+    from utilities.ez_os.get_files import GetFiles as _GetFiles
 except ImportError:
-    from .utilities.ez_os.get_files import GetFiles
+    from .utilities.ez_os.get_files import GetFiles as _GetFiles
 
 
-class ListOfFilesFromExtensions(GetFiles):
+class ListOfFilesFromExtensions(_GetFiles):
     """
     Class for getting the list of files from a folder.
     """
@@ -48,7 +48,7 @@ class ListOfFilesFromExtensions(GetFiles):
                                                         working_directory=directory)
 
 
-class ListOfFilesFromName(GetFiles):
+class ListOfFilesFromName(_GetFiles):
 
     def __init__(self, file_name: Union[str, list], directory: str = os.curdir):
         """
