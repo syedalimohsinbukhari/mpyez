@@ -7,9 +7,9 @@ import os
 from typing import Union
 
 try:
-    from . import errors as errors_
+    from . import errors as _errors
 except ImportError:
-    import errors as errors_
+    import errors as _errors
 
 
 class GetFiles:
@@ -55,9 +55,9 @@ class GetFiles:
         mask_ = [x not in self.lof for x in exclude_file]
 
         if True in mask_:
-            raise errors_.FileNotPresent(
-                    f'The file(s) named {", ".join(itertools.compress(exclude_file, mask_))} do '
-                    f'not exist in the list of files.')
+            raise _errors.FileNotPresent(f'The file(s) named '
+                                         f'{", ".join(itertools.compress(exclude_file, mask_))} '
+                                         f'do not exist in the list of files.')
         else:
             tuple(self.lof.remove(x) for x in exclude_file)
 
