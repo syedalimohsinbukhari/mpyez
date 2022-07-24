@@ -127,19 +127,19 @@ def string_list_to_numeric(str_list: list) -> list:
     mask_ = [is_alphabet(element) for element in str_list]
 
     if any(mask_):
-        raise errors.AlphabetFound(f'An alphabet found in the list passed, {", ".join(compress(str_list, mask_))} '
-                                   f'cannot be processed.')
+        raise errors.AlphabetFound(f'An alphabet found in the list passed, '
+                                   f'{", ".join(compress(str_list, mask_))} cannot be processed.')
 
     return list(map(str, str_list))
 
 
-def nested_list_to_list(nested_list: List[list]) -> list:
+def nested_list_to_list(nested_list: List[Any]) -> list:
     """
     Convert nested list to a single list.
 
     Parameters
     ----------
-    nested_list : List[list]
+    nested_list : List[Any]
         An even/uneven nested list.
 
     Returns
@@ -239,7 +239,7 @@ def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = Fa
     mask1 = [i for i, v in enumerate(out_list) if type(v) == list]
 
     # change the values at mask1 indices from lists to tuples
-    if mask1:
+    if mask1 is not None:
         for value in mask1:
             out_list[value] = tuple(out_list[value])
 
@@ -253,9 +253,11 @@ def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = Fa
             out_list = sorted(out_list)
         except TypeError:
             n_types = list(set([type(element) for element in out_list]))
-            mask2 = [[index for index, value in enumerate(out_list) if isinstance(value, types)] for types in n_types]
+            mask2 = [[index for index, value in enumerate(out_list) if isinstance(value, types)] for
+                     types in n_types]
 
-            out_list = [sorted(element) for element in [[out_list[value] for value in index] for index in mask2]]
+            out_list = [sorted(element) for element in
+                        [[out_list[value] for value in index] for index in mask2]]
             out_list = nested_list_to_list(out_list)
 
     if tuples_as_lists:
@@ -270,12 +272,9 @@ def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = Fa
 
 class Replace:
 
-    def __init__(self, input_list: list, work_on: Union[list, int], replace_with: Union[list, int], by: str = 'index',
-                 new_list: list = False):
-        if new_list:
-            self.input_list = deepcopy(input_list)
-        else:
-            self.input_list = input_list
+    def __init__(self, input_list: list, work_on: Union[list, int], replace_with: Union[list, int],
+                 by: str = 'index', new_list: list = False):
+        self.input_list = deepcopy(input_list) if new_list else input_list
         self.work_on = work_on
         self.replace_with = replace_with
         self.by = by
@@ -310,8 +309,8 @@ class Replace:
     def __replace_values(self, primary_list=None) -> None:
         primary_list = self.work_on if primary_list is None else primary_list
 
-        for index_, value_ in zip(primary_list, self.replace_with):
-            self.input_list[index_] = value_
+        for index, value in zip(primary_list, self.replace_with):
+            self.input_list[index] = value
 
     def at_index(self) -> list:
         self.work_on, self.replace_with = self.__convert_inputs_to_lists()
@@ -319,7 +318,7 @@ class Replace:
 
         bool_mask = [_index > len(self.input_list) - 1 for _index in self.work_on]
 
-        if True in bool_mask:
+        if any(bool_mask):
             join_ = ", ".join(compress(numeric_list_to_string(self.replace_with), bool_mask))
             raise errors.IndexOutOfList(f'Index {join_} is out of bound for a list of length '
                                         f'{len(self.input_list)}.')
@@ -334,7 +333,7 @@ class Replace:
 
         bool_mask = [element not in self.input_list for element in self.work_on]
 
-        if True in bool_mask:
+        if any(bool_mask):
             join_ = ", ".join(compress(numeric_list_to_string(self.work_on), bool_mask))
             raise errors.GotAnUnknownValue(f'The value {join_} given in old_element does not exist '
                                            f'in the input_list.')
@@ -347,4 +346,34 @@ class Replace:
 
 
 def is_contained(child_list: list, parent_list: list) -> bool:
+    """
+    Check if the child_list is contained within the parent_list.
+
+    Parameters
+    ----------
+    child_list : list
+        The list to be checked for containment in parent list.
+    parent_list : list
+        The list to be checked for containment of child list.
+
+    Returns
+    -------
+    bool
+        Whether the child list is contained within parent list or not
+
+    Examples
+    --------
+    To check whether,
+
+    >>> a = [1, '2', 3, 'A']
+
+    is contained within
+
+    >>> b = [1, '2', 3, 4, 5, 'A']
+
+    the is_contained method can be used
+
+    >>> is_contained(a, b)
+    >>> True
+    """
     return True if all([child in parent_list for child in child_list]) else False
