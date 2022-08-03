@@ -5,8 +5,8 @@ with open('README.md', 'r') as f:
 
 setup(
         name='ezPy',
-        version='0.1.0',
-        packages=find_packages(where="src"),
+        version='0.0.1a0',
+        packages=find_packages(where="src", exclude=['*tests*']),
         url='https://github.com/syedalimohsinbukhari/ezPy',
         license='MIT',
         author='Syed Ali Mohsin Bukhari, Astrophysics and Python',

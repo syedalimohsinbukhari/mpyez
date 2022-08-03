@@ -1,15 +1,15 @@
 """Created on Jul 20 11:54:27 2022."""
-
+from collections import Counter
 from copy import deepcopy
 from itertools import chain, compress
 from typing import Any, List, Union
 
 try:
     from .ez_misc import is_alphabet as _is_alphabet
-    from .utilities.ez_os import errors as _errors, utilities as _utilities
+    from .utilities.ez_list import errors as _errors
 except ImportError:
     from ez_misc import is_alphabet as _is_alphabet
-    from utilities.ez_list import errors as _errors, utilities as _utilities
+    from utilities.ez_list import errors as _errors
 
 
 def numeric_list_to_string(num_list: List[int]) -> List[str]:
@@ -65,7 +65,7 @@ def string_list_to_numeric(str_list: list) -> list:
         raise _errors.AlphabetFound(f'An alphabet found in the list passed, '
                                     f'{", ".join(compress(str_list, mask_))} cannot be processed.')
 
-    return list(map(str, str_list))
+    return list(map(int, str_list))
 
 
 def nested_list_to_list(nested_list: List[Any]) -> list:
@@ -226,18 +226,16 @@ class Replace:
     def __equalizing_list_length(self) -> list:
         if self.by == 'index':
             names = ['index', 'value']
-        else:
+        elif self.by == 'value':
             names = ['old_elements', 'new_elements']
-
-        if len(self.replace_with) > len(self.work_on):
-            raise _errors.UnequalElements(f'The number of elements in the {names[0]} list is '
-                                          f'greater than that of {names[1]}. Cannot perform '
-                                          f'replacement in this case.')
-        elif len(self.replace_with) < len(self.work_on):
-            diff = len(self.work_on) - len(self.replace_with)
-            self.replace_with = self.replace_with * (diff + 1)
         else:
-            self.replace_with = self.replace_with
+            raise _errors.InvalidInputParameter('The input parameter required is, \'index\', '
+                                                'or \'value\'.')
+
+        if len(self.replace_with) != len(self.work_on):
+            raise _errors.UnequalElements(f'The number of elements in the {names[0]} list is '
+                                          f'not equal to that of {names[1]}. Cannot perform '
+                                          f'replacement in this case.')
 
         return self.replace_with
 
@@ -312,3 +310,25 @@ def is_contained(child_list: list, parent_list: list) -> bool:
     >>> True
     """
     return True if all([child in parent_list for child in child_list]) else False
+
+
+class CountObjectsInList:
+
+    def __init__(self, counter_dict):
+        self.counter_dict = counter_dict
+
+    def __str__(self):
+        return '\n'.join([f'{k} --> {v}' if not isinstance(k, str) else f"\'{k}\' --> {v}"
+                          for k, v in self.counter_dict.items()])
+
+
+def get_object_count(input_list):
+    return CountObjectsInList(dict(Counter(input_list)))
+
+
+def sort_(input_list, get_sorting_indices=False):
+    if get_sorting_indices:
+        ind = range(len(input_list))
+        return [list(i) for i in zip(*sorted(zip(input_list, ind)))]
+    else:
+        return sorted(input_list)

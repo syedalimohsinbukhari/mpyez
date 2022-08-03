@@ -29,3 +29,7 @@ class ChildListLengthError(EzListErrs):
 
 class StringNotPassed(EzListErrs):
     pass
+
+
+class InvalidInputParameter(EzListErrs):
+    pass

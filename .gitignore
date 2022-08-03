@@ -133,3 +133,4 @@ dmypy.json
 /src/ezPy/main.py
 /src/ezPy/list_comprehension_explanation.py
 /src/ezPy/test.txt
+do_tests.bash
