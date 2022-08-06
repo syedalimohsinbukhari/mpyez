@@ -6,7 +6,7 @@ except ImportError:
     import errors as _errors
 
 
-def raise_error(open_file, lines_to_read):
+def check_for_errors(open_file, lines_to_read):
     if all([x >= 0 for x in lines_to_read]):
         if max(lines_to_read) > len(open_file) - 1:
             err = True

@@ -1,4 +1,5 @@
 """Created on Jul 20 11:54:27 2022."""
+import copy
 from collections import Counter
 from copy import deepcopy
 from itertools import chain, compress
@@ -316,14 +317,30 @@ class CountObjectsInList:
 
     def __init__(self, counter_dict):
         self.counter_dict = counter_dict
+        self.__counter_dict = sorted(self.counter_dict.items(), key=lambda x: x[1], reverse=True)
+
+        self.counter = 0
 
     def __str__(self):
         return '\n'.join([f'{k} --> {v}' if not isinstance(k, str) else f"\'{k}\' --> {v}"
                           for k, v in self.counter_dict.items()])
 
+    def __getitem__(self, item):
+        _get = self.__counter_dict[item]
+        try:
+            return CountObjectsInList({element[0]: element[1] for element in _get})
+        except TypeError:
+            return CountObjectsInList({_get[0]: _get[1]})
 
-def get_object_count(input_list):
-    return CountObjectsInList(dict(Counter(input_list)))
+
+def get_object_count(input_list, top_n: float = -1):
+    obj_ = CountObjectsInList(dict(Counter(input_list)))
+
+    if top_n == -1:
+        return obj_
+    else:
+        return obj_[0: top_n]
+    # return CountObjectsInList(dict(Counter(input_list)))
 
 
 def sort_(input_list, get_sorting_indices=False):
@@ -332,3 +349,11 @@ def sort_(input_list, get_sorting_indices=False):
         return [list(i) for i in zip(*sorted(zip(input_list, ind)))]
     else:
         return sorted(input_list)
+
+
+def move_element_in_list(input_list, old_position, new_position, get_new_list=False):
+    inp_ = input_list if not get_new_list else copy.deepcopy(input_list)
+
+    inp_.insert(new_position, inp_.pop(old_position))
+
+    return inp_
