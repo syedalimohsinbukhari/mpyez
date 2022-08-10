@@ -130,7 +130,7 @@ dmypy.json
 .idea/
 
 # testing files
-/src/ezPy/main.py
-/src/ezPy/list_comprehension_explanation.py
-/src/ezPy/test.txt
+/src/mpyez/main.py
+/src/mpyez/list_comprehension_explanation.py
+/src/mpyez/test.txt
 do_tests.bash

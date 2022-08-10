@@ -4,7 +4,7 @@ with open('README.md', 'r') as f:
     readme = f.read()
 
 setup(
-        name='ezPy',
+        name='mpyez',
         version='0.0.1',
         packages=find_packages(where="src", exclude=['*tests*']),
         url='https://github.com/syedalimohsinbukhari/ezPy',
