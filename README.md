@@ -16,6 +16,10 @@ Common use utilities for python done easy.
 
 This library is intended to lower complexity of daily recurring tasks.
 
+## How to install
+
+Use pip: `pip install ezPy`
+
 ## Examples
 
 Let's say, you want to convert a nested list
