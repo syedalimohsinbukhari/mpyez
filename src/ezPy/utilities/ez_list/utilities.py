@@ -78,3 +78,31 @@ def replace_element(input_list, old_element, new_element, new_list=False):
     index = [input_list.index(element) for element in old_element]
 
     return replace_at_index(input_list, index, new_element)
+
+
+class CountObjectsInList:
+
+    def __init__(self, counter_dict):
+        self.counter_dict = counter_dict
+        self.__counter_dict = sorted(self.counter_dict.items(), key=lambda x: x[1], reverse=True)
+
+        self.counter = 0
+
+    def __str__(self):
+        print('-' * 48)
+        print('|' + 'items'.center(30, ' ') + '|' + 'counts'.center(15, ' ') + '|')
+        print('-' * 48)
+        print('\n'.join(['|' + f'{key}'.center(30, ' ') + '|' + f'{value}'.center(15, ' ') + '|'
+                         if not isinstance(key, str)
+                         else '|' + f"\'{key}\'".center(30, ' ') + '|' +
+                              f"{value}".center(15, ' ') + '|'
+                         for key, value in self.counter_dict.items()]))
+        print('-' * 48)
+        return ''
+
+    def __getitem__(self, item):
+        _get = self.__counter_dict[item]
+        try:
+            return CountObjectsInList({element[0]: element[1] for element in _get})
+        except TypeError:
+            return CountObjectsInList({_get[0]: _get[1]})
