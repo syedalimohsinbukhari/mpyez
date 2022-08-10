@@ -322,8 +322,16 @@ class CountObjectsInList:
         self.counter = 0
 
     def __str__(self):
-        return '\n'.join([f'{k} --> {v}' if not isinstance(k, str) else f"\'{k}\' --> {v}"
-                          for k, v in self.counter_dict.items()])
+        print('-' * 48)
+        print('|' + 'items'.center(30, ' ') + '|' + 'counts'.center(15, ' ') + '|')
+        print('-' * 48)
+        print('\n'.join(['|' + f'{key}'.center(30, ' ') + '|' + f'{value}'.center(15, ' ') + '|'
+                         if not isinstance(key, str)
+                         else '|' + f"\'{key}\'".center(30, ' ') + '|' +
+                              f"{value}".center(15, ' ') + '|'
+                         for key, value in self.counter_dict.items()]))
+        print('-' * 48)
+        return ''
 
     def __getitem__(self, item):
         _get = self.__counter_dict[item]
@@ -336,11 +344,7 @@ class CountObjectsInList:
 def get_object_count(input_list, top_n: float = -1):
     obj_ = CountObjectsInList(dict(Counter(input_list)))
 
-    if top_n == -1:
-        return obj_
-    else:
-        return obj_[0: top_n]
-    # return CountObjectsInList(dict(Counter(input_list)))
+    return obj_[:] if top_n == -1 else obj_ if top_n == 0 else obj_[0: top_n]
 
 
 def sort_(input_list, get_sorting_indices=False):
@@ -349,6 +353,16 @@ def sort_(input_list, get_sorting_indices=False):
         return [list(i) for i in zip(*sorted(zip(input_list, ind)))]
     else:
         return sorted(input_list)
+
+
+def remove_(input_list, value_to_remove):
+    if isinstance(value_to_remove, (tuple, str, list)):
+        ind_ = input_list.index(value_to_remove)
+        del input_list[ind_]
+    else:
+        input_list.pop(value_to_remove)
+
+    return input_list
 
 
 def move_element_in_list(input_list, old_position, new_position, get_new_list=False):
