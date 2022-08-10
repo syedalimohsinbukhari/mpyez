@@ -1,4 +1,5 @@
 """Created on Jul 20 11:54:27 2022."""
+
 import copy
 from collections import Counter
 from copy import deepcopy
@@ -8,9 +9,11 @@ from typing import Any, List, Union
 try:
     from .ez_misc import is_alphabet as _is_alphabet
     from .utilities.ez_list import errors as _errors
+    from .utilities.ez_list.utilities import CountObjectsInList
 except ImportError:
     from ez_misc import is_alphabet as _is_alphabet
     from utilities.ez_list import errors as _errors
+    from utilities.ez_list.utilities import CountObjectsInList
 
 
 def numeric_list_to_string(num_list: List[int]) -> List[str]:
@@ -313,46 +316,20 @@ def is_contained(child_list: list, parent_list: list) -> bool:
     return True if all([child in parent_list for child in child_list]) else False
 
 
-class CountObjectsInList:
-
-    def __init__(self, counter_dict):
-        self.counter_dict = counter_dict
-        self.__counter_dict = sorted(self.counter_dict.items(), key=lambda x: x[1], reverse=True)
-
-        self.counter = 0
-
-    def __str__(self):
-        print('-' * 48)
-        print('|' + 'items'.center(30, ' ') + '|' + 'counts'.center(15, ' ') + '|')
-        print('-' * 48)
-        print('\n'.join(['|' + f'{key}'.center(30, ' ') + '|' + f'{value}'.center(15, ' ') + '|'
-                         if not isinstance(key, str)
-                         else '|' + f"\'{key}\'".center(30, ' ') + '|' +
-                              f"{value}".center(15, ' ') + '|'
-                         for key, value in self.counter_dict.items()]))
-        print('-' * 48)
-        return ''
-
-    def __getitem__(self, item):
-        _get = self.__counter_dict[item]
-        try:
-            return CountObjectsInList({element[0]: element[1] for element in _get})
-        except TypeError:
-            return CountObjectsInList({_get[0]: _get[1]})
-
-
 def get_object_count(input_list, top_n: float = -1):
     obj_ = CountObjectsInList(dict(Counter(input_list)))
 
     return obj_[:] if top_n == -1 else obj_ if top_n == 0 else obj_[0: top_n]
 
 
-def sort_(input_list, get_sorting_indices=False):
+def sort_(input_list, reverse=False, get_sorting_indices=False):
     if get_sorting_indices:
         ind = range(len(input_list))
-        return [list(i) for i in zip(*sorted(zip(input_list, ind)))]
+        out = [list(i) for i in zip(*sorted(zip(input_list, ind)))]
+
+        return [i[::-1] for i in out] if reverse else out
     else:
-        return sorted(input_list)
+        return sorted(input_list, reverse=reverse)
 
 
 def remove_(input_list, value_to_remove):

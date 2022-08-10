@@ -34,20 +34,27 @@ This library is intended to lower complexity of daily recurring tasks.
    3. `nested_list_to_list` : To convert a nested list to 1D list.
    4. `list_to_nested_list` : To convert a simple 1D list to a nested list.
    5. `join_lists` : To join multiple lists into a single one
-   6. `is_contained` : To check if a given list is contained within another list.
-   7. `Replace` : To replace values in a list, either by given value or by the index.
+   6. `Replace` : To replace values in a list, either by given value or by the index.
+   7. `is_contained` : To check if a given list is contained within another list.
+   8. `get_object_count`: To get an object count from the list. Has an added capability of returning sorted list of
+      objects or top N objects.
+   9. `sort_`: To sort a list. Can also return the sort indices.
+   10. `remove_`: To remove a value from a given list. Can also remove `tuple`, `str`, or a nested `list`.
+   11. `move_element_in_list`: To move a given element present in the list to a new location within the list.
+4. `ez_read_files`
+   1. `read_text_file_in_a_list`: Reads an entire `txt` file.
+   2. `read_specific_lines_from_a_file`: Reads specific lines (index based) from a given `txt` file.
 
 ### Future implementations
 
-1. `ez_file_handling`
-   1. For reading text files in python,
-      1. whole files,
-      2. lazy loading, or
-      3. chunks of files only.
-   2. Implementation of reading other files will also be included
+1. `ez_read_files`
+   1. Whole files using generator to reduce memory issues,
+   2. Implementation of reading other files, especially `.csv`.
 2. `ez_dict`
    1. For handling dictionary manipulations methods easily. For example,
       1. updating dictionaries,
       2. index retrieval, and/or
       3. dictionary comparisons.
 3. And more
+
+### Documentation: IN PROGRESS
