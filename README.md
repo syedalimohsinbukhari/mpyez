@@ -18,6 +18,19 @@ Common use utilities for python done easy.
 
 This library is intended to lower complexity of daily recurring tasks.
 
+## Examples
+
+Let's say, you want to convert a nested list
+
+`>>> my_nested_list = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10]]`
+
+to a 1D list, with `ezPy` you can do it using `nested_list_to_list` function in `ez_list` module (see, Current
+implementations for details).
+
+`>>> nested_list_to_list(my_nested_list)`
+
+`>>> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`
+
 ## Modules
 
 ### Current implementations

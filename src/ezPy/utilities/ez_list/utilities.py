@@ -89,16 +89,16 @@ class CountObjectsInList:
         self.counter = 0
 
     def __str__(self):
-        print('-' * 48)
-        print('|' + 'items'.center(30, ' ') + '|' + 'counts'.center(15, ' ') + '|')
-        print('-' * 48)
-        print('\n'.join(['|' + f'{key}'.center(30, ' ') + '|' + f'{value}'.center(15, ' ') + '|'
-                         if not isinstance(key, str)
-                         else '|' + f"\'{key}\'".center(30, ' ') + '|' +
-                              f"{value}".center(15, ' ') + '|'
-                         for key, value in self.counter_dict.items()]))
-        print('-' * 48)
-        return ''
+        out = '-' * 48 + '\n'
+        out += '|' + 'items'.center(30, ' ') + '|' + 'counts'.center(15, ' ') + '|\n'
+        out += '-' * 48 + '\n'
+        out += '\n'.join(['|' + f'{key}'.center(30, ' ') + '|' + f'{value}'.center(15, ' ') + '|'
+                          if not isinstance(key, str)
+                          else '|' + f"\'{key}\'".center(30, ' ') + '|' +
+                               f"{value}".center(15, ' ') + '|'
+                          for key, value in self.counter_dict.items()]) + '\n'
+        out += '-' * 48 + '\n'
+        return out
 
     def __getitem__(self, item):
         _get = self.__counter_dict[item]

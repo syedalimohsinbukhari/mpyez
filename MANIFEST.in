@@ -1,2 +1,5 @@
 include ./README.md
 include ./LICENSE
+exclude ./list_comprehension_explanation.py
+exclude ./main.py
+exclude ./test.txt
