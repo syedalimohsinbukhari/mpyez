@@ -1,10 +1,5 @@
 """Created on Jul 23 16:56:48 2022."""
 
-try:
-    from .utilities.ez_read_files import errors, misc
-except ImportError:
-    from utilities.ez_read_files import errors, misc
-
 
 def read_text_file_in_a_list(file_to_read):
     open_file = [value.readlines() for _, value in enumerate(open(file=file_to_read, mode='r'))]

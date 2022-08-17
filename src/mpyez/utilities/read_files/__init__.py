@@ -2,7 +2,7 @@
 
 try:
     from . import errors
-    from . import misc
+    from . import utilities
 except ImportError:
     import errors
-    import misc
+    import utilities

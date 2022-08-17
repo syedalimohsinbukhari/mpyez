@@ -6,14 +6,7 @@ from copy import deepcopy
 from itertools import chain, compress
 from typing import Any, List, Union
 
-try:
-    from .ez_misc import is_alphabet as _is_alphabet
-    from .utilities.ez_list import errors as _errors
-    from .utilities.ez_list.utilities import CountObjectsInList
-except ImportError:
-    from ez_misc import is_alphabet as _is_alphabet
-    from utilities.ez_list import errors as _errors
-    from utilities.ez_list.utilities import CountObjectsInList
+from .utilities.list_ import errors, utilities
 
 
 def numeric_list_to_string(num_list: List[int]) -> List[str]:
@@ -63,11 +56,11 @@ def string_list_to_numeric(str_list: list) -> list:
     list
         A list containing numeric elements.
     """
-    mask_ = [_is_alphabet(element) for element in str_list]
+    mask_ = [element.isalpha() for element in str_list]
 
     if any(mask_):
-        raise _errors.AlphabetFound(f'An alphabet found in the list passed, '
-                                    f'{", ".join(compress(str_list, mask_))} cannot be processed.')
+        raise errors.AlphabetFound(f'An alphabet found in the list passed, '
+                                   f'{", ".join(compress(str_list, mask_))} cannot be processed.')
 
     return list(map(int, str_list))
 
@@ -233,13 +226,13 @@ class Replace:
         elif self.by == 'value':
             names = ['old_elements', 'new_elements']
         else:
-            raise _errors.InvalidInputParameter('The input parameter required is, \'index\', '
-                                                'or \'value\'.')
+            raise errors.InvalidInputParameter('The input parameter required is, \'index\', '
+                                               'or \'value\'.')
 
         if len(self.replace_with) != len(self.work_on):
-            raise _errors.UnequalElements(f'The number of elements in the {names[0]} list is '
-                                          f'not equal to that of {names[1]}. Cannot perform '
-                                          f'replacement in this case.')
+            raise errors.UnequalElements(f'The number of elements in the {names[0]} list is '
+                                         f'not equal to that of {names[1]}. Cannot perform '
+                                         f'replacement in this case.')
 
         return self.replace_with
 
@@ -257,8 +250,8 @@ class Replace:
 
         if any(bool_mask):
             join_ = ", ".join(compress(numeric_list_to_string(self.replace_with), bool_mask))
-            raise _errors.IndexOutOfList(f'Index {join_} is out of bound for a list of length '
-                                         f'{len(self.input_list)}.')
+            raise errors.IndexOutOfList(f'Index {join_} is out of bound for a list of length '
+                                        f'{len(self.input_list)}.')
 
         self.__replace_values()
 
@@ -272,8 +265,8 @@ class Replace:
 
         if any(bool_mask):
             join_ = ", ".join(compress(numeric_list_to_string(self.work_on), bool_mask))
-            raise _errors.GotAnUnknownValue(f'The value {join_} given in old_element does not '
-                                            f'exist in the input_list.')
+            raise errors.GotAnUnknownValue(f'The value {join_} given in old_element does not '
+                                           f'exist in the input_list.')
 
         index = [self.input_list.index(element) for element in self.work_on]
 
@@ -317,7 +310,7 @@ def is_contained(child_list: list, parent_list: list) -> bool:
 
 
 def get_object_count(input_list, top_n: float = -1):
-    obj_ = CountObjectsInList(dict(Counter(input_list)))
+    obj_ = utilities.CountObjectsInList(dict(Counter(input_list)))
 
     return obj_[:] if top_n == -1 else obj_ if top_n == 0 else obj_[0: top_n]
 

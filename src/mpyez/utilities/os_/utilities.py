@@ -6,10 +6,7 @@ import itertools
 import os
 from typing import Union
 
-try:
-    from . import errors as _errors
-except ImportError:
-    import errors as _errors
+from . import errors as _errors
 
 
 class GetFiles:

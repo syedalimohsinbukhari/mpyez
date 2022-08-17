@@ -5,10 +5,7 @@ Created on Jul 20 21:45:16 2022
 import copy
 from itertools import compress
 
-try:
-    from . import errors as _errors
-except ImportError:
-    import errors as _errors
+from . import errors as _errors
 
 
 def convert_inputs_to_lists(primary_list, secondary_list):

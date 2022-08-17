@@ -3,10 +3,7 @@
 import os
 from typing import Union
 
-try:
-    from utilities.ez_os.get_files import GetFiles as _GetFiles
-except ImportError:
-    from .utilities.ez_os.get_files import GetFiles as _GetFiles
+from .utilities.os_.utilities import GetFiles as _GetFiles
 
 
 class ListOfFilesFromExtensions(_GetFiles):

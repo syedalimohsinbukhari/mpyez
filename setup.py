@@ -5,7 +5,7 @@ with open('README.md', 'r') as f:
 
 setup(
         name='mpyez',
-        version='0.0.2',
+        version='0.0.3',
         packages=find_packages(where="src", exclude=['*tests*']),
         url='https://github.com/syedalimohsinbukhari/ezPy',
         license='MIT',

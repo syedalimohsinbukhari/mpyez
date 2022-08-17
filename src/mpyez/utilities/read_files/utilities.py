@@ -1,9 +1,6 @@
 """Created on Jul 23 18:38:52 2022."""
 
-try:
-    from . import errors as _errors
-except ImportError:
-    import errors as _errors
+from . import errors as _errors
 
 
 def check_for_errors(open_file, lines_to_read):

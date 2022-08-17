@@ -1,7 +1,7 @@
 import unittest
 
-import src.mpyez.ez_list as ez_list
-from src.mpyez.utilities.ez_list import errors
+import src.mpyez.list_ as ez_list
+from src.mpyez.utilities.list_ import errors
 
 
 class Test(unittest.TestCase):

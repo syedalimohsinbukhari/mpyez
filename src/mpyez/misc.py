@@ -4,41 +4,6 @@ import itertools
 from typing import Any
 
 
-def is_alphabet(input_: Any) -> bool:
-    """
-    Check if the given input is an alphabet or not.
-
-    Parameters
-    ----------
-    input_ : Any
-        The input string to be checked
-
-    Returns
-    -------
-    bool
-        ``True`` if the input_ is string, else ``False``.
-
-    Examples
-    --------
-    Let's say we have
-
-    >>> a = 'A'
-
-    as an input, and we want to check whether it is alphabet or not,
-
-    >>> is_alphabet(a)
-    >>> True
-
-    However, if
-
-    >>> a = 1
-
-    >>> is_alphabet(a)
-    >>> False
-    """
-    return input_.isalpha()
-
-
 def is_numeric(input_: Any, bool_check=True, get_mask=False, get_numeric=False):
     """
     Check whether the input is numeric or not.
