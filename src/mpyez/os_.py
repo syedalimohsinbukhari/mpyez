@@ -3,10 +3,10 @@
 import os
 from typing import Union
 
-from .utilities.os_.utilities import GetFiles as _GetFiles
+from .utilities.os_ import utilities
 
 
-class ListOfFilesFromExtensions(_GetFiles):
+class ListOfFilesFromExtensions(utilities.GetFiles):
     """
     Class for getting the list of files from a folder.
     """
@@ -41,11 +41,12 @@ class ListOfFilesFromExtensions(_GetFiles):
         >>> list_of_files.exclude(exclude_file='remove_me.py')
         """
 
-        super(ListOfFilesFromExtensions, self).__init__(input_variable=extension, var_type='ext',
+        super(ListOfFilesFromExtensions, self).__init__(input_variable=extension,
+                                                        var_type='ext',
                                                         working_directory=directory)
 
 
-class ListOfFilesFromName(_GetFiles):
+class ListOfFilesFromName(utilities.GetFiles):
 
     def __init__(self, file_name: Union[str, list], directory: str = os.curdir):
         """
@@ -79,5 +80,6 @@ class ListOfFilesFromName(_GetFiles):
         >>> list_of_files.exclude(exclude_file='remove_me.py')
         """
 
-        super(ListOfFilesFromName, self).__init__(input_variable=file_name, var_type='name',
+        super(ListOfFilesFromName, self).__init__(input_variable=file_name,
+                                                  var_type='name',
                                                   working_directory=directory)
