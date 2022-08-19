@@ -1,6 +1,4 @@
-"""
-Created on Jul 20 00:17:54 2022
-"""
+"""Created on Jul 20 00:17:54 2022."""
 
 import itertools
 import os

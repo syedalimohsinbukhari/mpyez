@@ -1,15 +1,34 @@
 """Created on Jul 23 04:26:54 2022."""
 
+import copy
 
-class Sort_:
+from .utilities.dict_ import utilities
 
-    def __init__(self, input_dictionary, sort_by='values'):
-        self.inp_dict = input_dictionary
-        self.sort_ = sort_by
 
-    def __sorter(self, ind, reverse):
+def sort_dictionary(input_dictionary, sort_by='values', sort_reverse=False):
+    def __sorter(index, reverse):
         # taken from https://stackoverflow.com/a/613218/3212945
-        return dict(sorted(self.inp_dict.items(), key=lambda x: x[ind], reverse=reverse))
+        return dict(sorted(input_dictionary.items(), key=lambda x: x[index], reverse=reverse))
 
-    def get(self, reverse=False):
-        return self.__sorter(1 if self.sort_ == 'values' else 0, reverse=reverse)
+    return __sorter(index=1 if sort_by == 'values' else 0, reverse=sort_reverse)
+
+
+def merge_dictionaries(input_dictionaries, keep_original_dictionaries=True):
+    inp_dict = [copy.deepcopy(dict_)
+                if keep_original_dictionaries else input_dictionaries
+                for dict_ in input_dictionaries]
+
+    [utilities.change_value_to_list(dict_) for dict_ in inp_dict]
+
+    merged_ = {}
+
+    for dict_ in inp_dict:
+        for key, value in dict_.items():
+            if key not in merged_.keys():
+                merged_.update({key: value})
+            else:
+                merged_[key].extend(value)
+
+    utilities.change_list_to_values(merged_)
+
+    return merged_

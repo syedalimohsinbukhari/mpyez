@@ -309,35 +309,122 @@ def is_contained(child_list: list, parent_list: list) -> bool:
     return True if all([child in parent_list for child in child_list]) else False
 
 
-def get_object_count(input_list, top_n: float = -1):
-    obj_ = utilities.CountObjectsInList(dict(Counter(input_list)))
+def get_object_count(input_list: list, top_n: float = -1, get_tabular_form: bool = False):
+    """
+    Get the count of objects in a given list.
 
-    return obj_[:] if top_n == -1 else obj_ if top_n == 0 else obj_[0: top_n]
+    Parameters
+    ----------
+    input_list : list
+        The given list to get the element count from.
+    top_n : float, optional
+        Whether to show top `N` elements or all of them from the list. The default is -1.
+    get_tabular_form : bool, optional
+        DESCRIPTION. The default is False.
+
+    Returns
+    -------
+    count_obj
+        Either a dictionary or a CountObjectsInList object representing the counts of objects in a
+        given list.
+
+    """
+    counts = dict(Counter(input_list))
+
+    if get_tabular_form:
+        obj_ = utilities.CountObjectsInList(counts)
+        count_obj = obj_[:] if top_n == -1 else obj_ if top_n == 0 else obj_[0: top_n]
+        print(type(count_obj))
+    else:
+        count_obj = counts
+
+    return count_obj
 
 
-def sort_(input_list, reverse=False, get_sorting_indices=False):
+def sort_(input_list: list, ascending_order: bool = True, get_sorting_indices: bool = True) -> list:
+    """
+    Sort the given list.
+
+    Parameters
+    ----------
+    input_list : list
+        The list to be sorted.
+    ascending_order : bool, optional
+        Whether to sort the list in ascending or descending order. The default is False.
+    get_sorting_indices : bool, optional
+        Get the order of sort in the original list. The default is True.
+
+    Returns
+    -------
+        Sorted list. Sort list indices, optional.
+
+    """
+    sort_order = False if ascending_order else True
+
     if get_sorting_indices:
-        ind = range(len(input_list))
-        out = [list(i) for i in zip(*sorted(zip(input_list, ind)))]
+        sorted_list = (list(i) for i in zip(*sorted(zip(input_list, range(len(input_list))))))
 
-        return [i[::-1] for i in out] if reverse else out
+        return [element[::-1] for element in sorted_list] if sort_order else list(sorted_list)
     else:
-        return sorted(input_list, reverse=reverse)
+        return sorted(input_list, reverse=sort_order)
 
 
-def remove_(input_list, value_to_remove):
+def remove_(input_list: list, value_to_remove: Union[list, tuple, str, int],
+            get_new_list: bool = False) -> list:
+    """
+    Remove a certain value from the input list.    
+
+    Parameters
+    ----------
+    input_list : list
+        The list from which the value is to be removed.
+    value_to_remove : Union[list, tuple, str, int]
+        The value to remove. The value can either be an int, str, tuple or even a nested list.
+    get_new_list : bool, optional
+        Whether the original list should be preserved or not. The default is False.
+        
+
+    Returns
+    -------
+    modified_list : list
+        Modified list with the value removed from it.
+
+    """
+    modified_list = input_list if not get_new_list else copy.deepcopy(input_list)
+
     if isinstance(value_to_remove, (tuple, str, list)):
-        ind_ = input_list.index(value_to_remove)
-        del input_list[ind_]
+        ind_ = modified_list.index(value_to_remove)
+        del modified_list[ind_]
     else:
-        input_list.pop(value_to_remove)
+        modified_list.pop(value_to_remove)
 
-    return input_list
+    return modified_list
 
 
-def move_element_in_list(input_list, old_position, new_position, get_new_list=False):
-    inp_ = input_list if not get_new_list else copy.deepcopy(input_list)
+def move_element_in_list(input_list: list, old_position: Union[list, int],
+                         new_position: Union[list, int], get_new_list: bool = False) -> list:
+    """
+    Moves an element from `old_position` in the given list to `new_position`.
 
-    inp_.insert(new_position, inp_.pop(old_position))
+    Parameters
+    ----------
+    input_list : list
+        The list in which the element/elements are to be moved.
+    old_position : Union[list, int]
+        The index (or list of index) on which the element to be moved is currently present.
+    new_position : Union[list, int]
+        The index (or list of index) to which the element is to be moved.
+    get_new_list : bool, optional
+        Whether the original list should be preserved or not. The default is False.
 
-    return inp_
+    Returns
+    -------
+    list_ : list
+        List with the position of elements changed..
+
+    """
+    list_ = input_list if not get_new_list else copy.deepcopy(input_list)
+
+    list_.insert(new_position, list_.pop(old_position))
+
+    return list_

@@ -1,6 +1,4 @@
-"""
-Created on Jul 20 12:22:44 2022
-"""
+"""Created on Jul 20 12:22:44 2022."""
 
 
 class EzOsErrs(Exception):

@@ -1,6 +1,4 @@
-"""
-Created on Jul 20 21:45:16 2022
-"""
+"""Created on Jul 20 21:45:16 2022."""
 
 import copy
 from itertools import compress
@@ -86,15 +84,15 @@ class CountObjectsInList:
         self.counter = 0
 
     def __str__(self):
-        out = '-' * 48 + '\n'
-        out += '|' + 'items'.center(30, ' ') + '|' + 'counts'.center(15, ' ') + '|\n'
-        out += '-' * 48 + '\n'
-        out += '\n'.join(['|' + f'{key}'.center(30, ' ') + '|' + f'{value}'.center(15, ' ') + '|'
+        out = '-' * 50 + '\n'
+        out += '|' + 'items'.center(30, ' ') + '|' + 'counts'.center(17, ' ') + '|\n'
+        out += '-' * 50 + '\n'
+        out += '\n'.join(['|' + f'{key}'.center(30, ' ') + '|' + f'{value}'.center(17, ' ') + '|'
                           if not isinstance(key, str)
                           else '|' + f"\'{key}\'".center(30, ' ') + '|' +
-                               f"{value}".center(15, ' ') + '|'
+                               f"{value}".center(17, ' ') + '|'
                           for key, value in self.counter_dict.items()]) + '\n'
-        out += '-' * 48 + '\n'
+        out += '-' * 50 + '\n'
         return out
 
     def __getitem__(self, item):

@@ -128,9 +128,3 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .idea/
-
-# testing files
-/src/mpyez/main.py
-/src/mpyez/list_comprehension_explanation.py
-/src/mpyez/test.txt
-do_tests.bash
