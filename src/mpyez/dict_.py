@@ -32,3 +32,7 @@ def merge_dictionaries(input_dictionaries, keep_original_dictionaries=True):
     utilities.change_list_to_values(merged_)
 
     return merged_
+
+
+def pretty_print(input_dictionary):
+    return utilities.PrettyPrint(input_dictionary)
