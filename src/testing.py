@@ -15,8 +15,13 @@
 # print(dict_.merge_dictionaries([a, b], True))
 # print(dict_.sort_dictionary(a, 'key', False))
 
-a = [1, 2, 3, 5, 6, 8, 4, 12, 346, 12, 12, 8, 567, 34, 25]
+# a = [1, 2, 3, 5, 6, 8, 4, 12, 346, 12, 12, 8, 567, 34, 25]
+b = {1: 1, 2: [2, 3, 4], 3: ['A', 1, 2]}
+#
+# from mpyez import list_
+#
+# print(list_.get_object_count(a, get_tabular_form=True))
 
-from mpyez import list_
+from mpyez import dict_
 
-print(list_.get_object_count(a, get_tabular_form=True))
+print(dict_.pretty_print(b))
