@@ -428,3 +428,9 @@ def move_element_in_list(input_list: list, old_position: Union[list, int],
     list_.insert(new_position, list_.pop(old_position))
 
     return list_
+
+
+def difference_between_lists(input_list1, input_list2):
+    diff1 = [element for element in input_list1 if element not in input_list2]
+    diff2 = [element for element in input_list2 if element not in input_list1]
+    return diff1, diff2
