@@ -2,6 +2,7 @@
 
 import copy
 
+from .list_ import index_
 from .utilities.dict_ import utilities
 
 
@@ -36,3 +37,7 @@ def merge_dictionaries(input_dictionaries, keep_original_dictionaries=True):
 
 def pretty_print(input_dictionary):
     return utilities.PrettyPrint(input_dictionary)
+
+
+def get_key_index(input_dictionary, key, is_iterator=True):
+    return index_(input_list=list(input_dictionary.keys()), iterator=key, is_iterator=is_iterator)
