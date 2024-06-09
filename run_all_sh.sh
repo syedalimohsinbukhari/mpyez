@@ -1,3 +1,5 @@
+#!/bin/bash
+
 bash ./shell_scripts/linting.sh
 echo "Done Linting"
 echo ""
