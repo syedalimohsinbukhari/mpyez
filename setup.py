@@ -16,7 +16,7 @@ setup(
     description='Common use utilities for python done easy.',
     long_description=readme,
     long_description_content_type="text/markdown",
-    python_requires=">=3.10.*, <3.12.*",
+    python_requires=">3.9, <3.12",
     # install_requires=["astropy~=4.3.1", "numpy~=1.21.6", "setuptools~=59.6.0",
     # "pillow~=9.1.1"],
     include_package_data=True,
