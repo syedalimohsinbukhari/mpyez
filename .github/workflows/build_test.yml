@@ -29,4 +29,5 @@ jobs:
                 run: python -m build
             -   name: Analysing the code with pylint
                 run: |
+                    pip install pylint
                     pylint --rcfile=./.pylintrc --fail-under=7 $(git ls-files '*.py')
