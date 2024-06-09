@@ -2,9 +2,11 @@
 
 Common use utilities for python done easy.
 
-![GitHub](https://img.shields.io/github/license/syedalimohsinbukhari/mpyez?color=blue&style=for-the-badge)
+![GitHub-licence](https://img.shields.io/github/license/syedalimohsinbukhari/mpyez?style=for-the-badge&color=blue)
 ![GitHub top language](https://img.shields.io/github/languages/top/syedalimohsinbukhari/mpyez?color=green&style=for-the-badge)
 ![GitHub contributors](https://img.shields.io/github/contributors/syedalimohsinbukhari/mpyez?style=for-the-badge)
+![Github Issues](https://img.shields.io/github/issues/syedalimohsinbukhari/mpyez?color=red&style=for-the-badge)
+![GitHub PRs](https://img.shields.io/github/issues-pr/syedalimohsinbukhari/mpyez?color=maroon&style=for-the-badge)
 
 ## What is `mpyez`
 
