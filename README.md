@@ -2,9 +2,11 @@
 
 Common use utilities for python done easy.
 
-![GitHub](https://img.shields.io/github/license/syedalimohsinbukhari/mpyez?color=blue&style=for-the-badge)
+![GitHub-licence](https://img.shields.io/github/license/syedalimohsinbukhari/mpyez?style=for-the-badge&color=blue)
 ![GitHub top language](https://img.shields.io/github/languages/top/syedalimohsinbukhari/mpyez?color=green&style=for-the-badge)
 ![GitHub contributors](https://img.shields.io/github/contributors/syedalimohsinbukhari/mpyez?style=for-the-badge)
+![Github Issues](https://img.shields.io/github/issues/syedalimohsinbukhari/mpyez?color=red&style=for-the-badge)
+![GitHub PRs](https://img.shields.io/github/issues-pr/syedalimohsinbukhari/mpyez?color=maroon&style=for-the-badge)
 
 ## What is `mpyez`
 
@@ -26,7 +28,8 @@ Let's say, you want to convert a nested list
 
 `>>> my_nested_list = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10]]`
 
-to a 1D list, with `mpyez` you can do it using `nested_list_to_list` function in `ez_list` module (see, Current implementations for details).
+to a 1D list, with `mpyez` you can do it using `nested_list_to_list` function in `ez_list` module (see, Current
+implementations for details).
 
 `>>> nested_list_to_list(my_nested_list)`
 

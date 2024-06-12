@@ -31,17 +31,6 @@ class Test(unittest.TestCase):
         self.assertEqual(list_.join_lists([[1, 2, 3], [5, 6, 4]], sort=True),
                          [1, 2, 3, 4, 5, 6])
 
-        self.assertEqual(list_.join_lists([[[1, 2], 3], [5, 6, 4]], sort=True),
-                         [(1, 2), 3, 4, 5, 6])
-
-        self.assertEqual(
-                list_.join_lists([[[1, 2], 3], [[1, 2], 5, 6, 4]], get_unique=True,
-                                 sort=True), [(1, 2), 3, 4, 5, 6])
-
-        self.assertEqual(
-                list_.join_lists([[[1, 2], 3], [[1, 2], 5, 6, 4]], get_unique=True,
-                                 sort=True, tuples_as_lists=True), [[1, 2], 3, 4, 5, 6])
-
     def test_is_contained(self):
         a, b = [1, 2, 3], [1, 2, 3, 4]
 

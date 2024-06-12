@@ -117,11 +117,8 @@ def list_to_nested_list(input_list: list, n_elements: int) -> List[list]:
 
     Notes
     -----
-    For lists with,
-
-    >>> len(list) % n_elements > 0
-
-    the number of elements in the last inner list will not match the rest.
+    For lists with, `len(list) % n_elements > 0`, the number of elements in the last inner list
+    will not match the rest.
 
     Examples
     --------
@@ -143,8 +140,7 @@ def list_to_nested_list(input_list: list, n_elements: int) -> List[list]:
     return [input_list[i:i + n_elements] for i in range(0, len(input_list), n_elements)]
 
 
-def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = False,
-               tuples_as_lists: bool = False) -> List[Any]:
+def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = False) -> List[Any]:
     """
     Joins two or more lists.
 
@@ -168,7 +164,7 @@ def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = Fa
     out_list = list(chain([], *input_lists))
 
     # get indices of all list elements with type == list
-    mask1 = [i for i, v in enumerate(out_list) if type(v) == list]
+    mask1 = [i for i, v in enumerate(out_list) if isinstance(v, list)]
 
     # change the values at mask1 indices from lists to tuples
     if mask1 is not None:
@@ -192,20 +188,13 @@ def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = Fa
                         [[out_list[value] for value in index] for index in mask2]]
             out_list = nested_list_to_list(out_list)
 
-    if tuples_as_lists:
-        for index, _ in enumerate(out_list):
-            try:
-                out_list[index] = list(out_list[index])
-            except TypeError:
-                break
-
     return out_list
 
 
 class Replace:
 
-    def __init__(self, input_list: list, work_on: Union[list, int], replace_with: Union[list, int],
-                 by: str = 'index', new_list: list = False):
+    def __init__(self, input_list: list, work_on: Union[list, int], replace_with: Union[list, int], by: str = 'index',
+                 new_list: list = False):
         self.input_list = deepcopy(input_list) if new_list else input_list
         self.work_on = work_on
         self.replace_with = replace_with
@@ -226,12 +215,11 @@ class Replace:
         elif self.by == 'value':
             names = ['old_elements', 'new_elements']
         else:
-            raise errors.InvalidInputParameter('The input parameter required is, \'index\', '
-                                               'or \'value\'.')
+            raise errors.InvalidInputParameter('The input parameter required is, \'index\', or \'value\'.')
 
         if len(self.replace_with) != len(self.work_on):
-            raise errors.UnequalElements(f'The number of elements in the {names[0]} list is '
-                                         f'not equal to that of {names[1]}. Cannot perform '
+            raise errors.UnequalElements(f'The number of elements in the {names[0]} list is not '
+                                         f'equal to that of {names[1]}. Cannot perform '
                                          f'replacement in this case.')
 
         return self.replace_with
@@ -265,8 +253,8 @@ class Replace:
 
         if any(bool_mask):
             join_ = ", ".join(compress(numeric_list_to_string(self.work_on), bool_mask))
-            raise errors.GotAnUnknownValue(f'The value {join_} given in old_element does not '
-                                           f'exist in the input_list.')
+            raise errors.GotAnUnknownValue(f'The value {join_} given in old_element does not exist '
+                                           f'in the input_list.')
 
         index = [self.input_list.index(element) for element in self.work_on]
 
@@ -306,7 +294,8 @@ def is_contained(child_list: list, parent_list: list) -> bool:
     >>> is_contained(a, b)
     >>> True
     """
-    return True if all([child in parent_list for child in child_list]) else False
+
+    return all(child in parent_list for child in child_list)
 
 
 def get_object_count(input_list: list, top_n: float = -1, get_tabular_form: bool = False):
@@ -382,7 +371,6 @@ def remove_(input_list: list, value_to_remove: Union[list, tuple, str, int],
         The value to remove. The value can either be an int, str, tuple or even a nested list.
     get_new_list : bool, optional
         Whether the original list should be preserved or not. The default is False.
-        
 
     Returns
     -------
@@ -401,8 +389,8 @@ def remove_(input_list: list, value_to_remove: Union[list, tuple, str, int],
     return modified_list
 
 
-def move_element_in_list(input_list: list, old_position: Union[list, int],
-                         new_position: Union[list, int], get_new_list: bool = False) -> list:
+def move_element_in_list(input_list: list, old_position: Union[list, int], new_position: Union[list, int],
+                         get_new_list: bool = False) -> list:
     """
     Moves an element from `old_position` in the given list to `new_position`.
 
@@ -419,8 +407,8 @@ def move_element_in_list(input_list: list, old_position: Union[list, int],
 
     Returns
     -------
-    list_ : list
-        List with the position of elements changed..
+    list_ :
+        A list with the position of elements changed.
 
     """
     list_ = input_list if not get_new_list else copy.deepcopy(input_list)
@@ -436,11 +424,8 @@ def difference_between_lists(input_list1, input_list2):
     return diff1, diff2
 
 
-def index_(input_list, iterator, is_iterator=True):
-    if not isinstance(iterator, list):
-        iterator = [iterator]
-
-    if is_iterator:
-        return [input_list.index(_elem) for _elem in iterator]
-    else:
+def index_(input_list, iterator):
+    if isinstance(iterator, int):
         return input_list.index(iterator)
+    else:
+        return [input_list.index(elem) for elem in iterator]

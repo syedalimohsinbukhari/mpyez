@@ -18,35 +18,24 @@ def change_list_to_values(input_dictionary):
 
 
 class PrettyPrint:
-
-    def __init__(self, input_dictionary):
+    def __init__(self, input_dictionary: dict):
         self.inp_dict = input_dictionary
 
     def __get_max_width(self):
-        _width = max([len(str_)
-                      for str_ in [str(value)
-                                   for value in self.inp_dict.values()]])
-
-        if _width > 71:
-            return _width + 1 if _width % 2 == 0 else +_width
-        else:
-            return 71
+        value_widths = [len(str(value)) for value in self.inp_dict.values()]
+        max_width = max(value_widths)
+        return max(max_width + 1, 71) if max_width % 2 == 0 else max(max_width, 71)
 
     def __str__(self):
-        max_ = self.__get_max_width()
+        max_width = self.__get_max_width()
 
-        width = max_ - 1
-        width /= 2
-        width -= 1
-        width = int(width)
-
-        pline = '-' * max_ + '\n'
+        width = (max_width - 1) // 2 - 1
+        pline = '-' * max_width + '\n'
 
         out = pline
-        out += '|' + 'dict_key'.center(width) + '|' + 'dict_value'.center(width) + '|\n'
+        out += f"|{'dict_key'.center(width)}|{'dict_value'.center(width)}|\n"
         out += pline
-        out += '\n'.join(['|' + f'{k}'.center(width) + '|' + f'{v}'.center(width) + '|'
-                          for k, v in self.inp_dict.items()]) + '\n'
+        out += '\n'.join([f"|{k.center(width)}|{v.center(width)}|" for k, v in self.inp_dict.items()]) + '\n'
         out += pline
 
         return out
