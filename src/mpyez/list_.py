@@ -140,8 +140,7 @@ def list_to_nested_list(input_list: list, n_elements: int) -> List[list]:
     return [input_list[i:i + n_elements] for i in range(0, len(input_list), n_elements)]
 
 
-def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = False,
-               tuples_as_lists: bool = False) -> List[Any]:
+def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = False) -> List[Any]:
     """
     Joins two or more lists.
 
@@ -165,7 +164,7 @@ def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = Fa
     out_list = list(chain([], *input_lists))
 
     # get indices of all list elements with type == list
-    mask1 = [i for i, v in enumerate(out_list) if type(v) == list]
+    mask1 = [i for i, v in enumerate(out_list) if isinstance(v, list)]
 
     # change the values at mask1 indices from lists to tuples
     if mask1 is not None:
@@ -188,13 +187,6 @@ def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = Fa
             out_list = [sorted(element) for element in
                         [[out_list[value] for value in index] for index in mask2]]
             out_list = nested_list_to_list(out_list)
-
-    if tuples_as_lists:
-        for index, _ in enumerate(out_list):
-            try:
-                out_list[index] = list(out_list[index])
-            except TypeError:
-                break
 
     return out_list
 
@@ -415,8 +407,8 @@ def move_element_in_list(input_list: list, old_position: Union[list, int], new_p
 
     Returns
     -------
-    list_ : list
-        List with the position of elements changed.
+    list_ :
+        A list with the position of elements changed.
 
     """
     list_ = input_list if not get_new_list else copy.deepcopy(input_list)
