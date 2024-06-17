@@ -1,11 +1,6 @@
 """Created on Aug 17 15:43:42 2022."""
 
-from mpyez import list_
+from src.mpyez.list_ import get_object_count
 
-# a = {1: 2, 3: 4, 2: 3, 6: 7}
-#
-# print(dict_.pretty_print(a))
-# print(dict_.get_key_index(a, 3))
-
-a = [1, 2, 3, 4, 5, 6, [1, 5]]
-print(list_.index_(a, [1, 5], True))
+p = get_object_count([1, 2, 3, 4, 2, 2, 3, 4, 56, 3, 3, 3, 4, 5, 3, 3, 2, 3], get_tabular_form=True)
+print(p)

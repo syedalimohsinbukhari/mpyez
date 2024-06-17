@@ -323,7 +323,6 @@ def get_object_count(input_list: list, top_n: float = -1, get_tabular_form: bool
     if get_tabular_form:
         obj_ = utilities.CountObjectsInList(counts)
         count_obj = obj_[:] if top_n == -1 else obj_ if top_n == 0 else obj_[0: top_n]
-        print(type(count_obj))
     else:
         count_obj = counts
 

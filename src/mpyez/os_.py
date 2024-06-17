@@ -1,6 +1,7 @@
 """Created on Jul 18 23:26:48 2022."""
 
 import os
+import shutil
 from typing import Union
 
 from .utilities.os_ import utilities
@@ -83,3 +84,33 @@ class ListOfFilesFromName(utilities.GetFiles):
         super(ListOfFilesFromName, self).__init__(input_variable=file_name,
                                                   var_type='name',
                                                   working_directory=directory)
+
+
+def move_directory_contents(old_path: str, new_path: str):
+    """
+    Moves the contents from `old_path` to `new_path`.
+
+    Parameters
+    ----------
+    old_path:
+        The old directory from which the files are to be moved.
+    new_path:
+        The new directory to which the files are to be moved.
+    """
+
+    if not os.path.exists(old_path):
+        raise Exception(f"The source directory '{old_path}' does not exist.")
+
+    if not os.path.exists(new_path):
+        os.makedirs(new_path)
+
+    for item in os.listdir(old_path):
+        old_item_path = os.path.join(old_path, item)
+        new_item_path = os.path.join(new_path, item)
+        shutil.move(old_item_path, new_item_path)
+
+    # Optionally, remove the old directory if it's empty
+    if not os.listdir(old_path):
+        os.rmdir(old_path)
+    else:
+        print(f"Warning: '{old_path}' is not empty after move.")
