@@ -7,7 +7,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name='mpyez',
-    version='0.0.4',
+    version='0.0.5',
     packages=find_packages(where="src", exclude=['*tests*']),
     url='https://github.com/syedalimohsinbukhari/mpyez',
     license='MIT',
