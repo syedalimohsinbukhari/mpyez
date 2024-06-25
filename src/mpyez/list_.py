@@ -9,6 +9,30 @@ from typing import Any, List, Union
 from .utilities.list_ import errors, utilities
 
 
+def equal_lists(lists: list) -> bool:
+    """
+    Check if all lists within a list have the same length.
+
+    Parameters
+    ----------
+    lists : list of lists
+        A list containing sublists to be checked.
+
+    Returns
+    -------
+    bool
+        True if all sublists have the same length, False otherwise.
+
+    Examples
+    --------
+    >>> equal_lists([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    True
+    >>> equal_lists([[1, 2, 3], [4, 5], [7, 8, 9]])
+    False
+    """
+    return len(set(map(len, lists))) == 1
+
+
 def numeric_list_to_string(num_list: List[int]) -> List[str]:
     """
     Convert all elements of a numeric lists to string.

@@ -1,2 +1,2 @@
-setuptools~=70.0.0
-numpy~=1.26.4
+numpy==1.26.4
+setuptools==70.0.0
