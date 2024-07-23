@@ -430,15 +430,15 @@ def move_element_in_list(input_list: list, old_position: Union[list, int], new_p
 
     Returns
     -------
-    list_ :
+    list :
         A list with the position of elements changed.
 
     """
-    list_ = input_list if not get_new_list else copy.deepcopy(input_list)
+    temp_ = input_list if not get_new_list else copy.deepcopy(input_list)
 
-    list_.insert(new_position, list_.pop(old_position))
+    temp_.insert(new_position, temp_.pop(old_position))
 
-    return list_
+    return temp_
 
 
 def difference_between_lists(input_list1, input_list2):
