@@ -9,6 +9,30 @@ from typing import Any, List, Union
 from .utilities.list_ import errors, utilities
 
 
+def equal_lists(lists: list) -> bool:
+    """
+    Check if all lists within a list have the same length.
+
+    Parameters
+    ----------
+    lists : list of lists
+        A list containing sublists to be checked.
+
+    Returns
+    -------
+    bool
+        True if all sublists have the same length, False otherwise.
+
+    Examples
+    --------
+    >>> equal_lists([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    True
+    >>> equal_lists([[1, 2, 3], [4, 5], [7, 8, 9]])
+    False
+    """
+    return len(set(map(len, lists))) == 1
+
+
 def numeric_list_to_string(num_list: List[int]) -> List[str]:
     """
     Convert all elements of a numeric lists to string.
@@ -323,7 +347,6 @@ def get_object_count(input_list: list, top_n: float = -1, get_tabular_form: bool
     if get_tabular_form:
         obj_ = utilities.CountObjectsInList(counts)
         count_obj = obj_[:] if top_n == -1 else obj_ if top_n == 0 else obj_[0: top_n]
-        print(type(count_obj))
     else:
         count_obj = counts
 
@@ -407,15 +430,15 @@ def move_element_in_list(input_list: list, old_position: Union[list, int], new_p
 
     Returns
     -------
-    list_ :
+    list :
         A list with the position of elements changed.
 
     """
-    list_ = input_list if not get_new_list else copy.deepcopy(input_list)
+    temp_ = input_list if not get_new_list else copy.deepcopy(input_list)
 
-    list_.insert(new_position, list_.pop(old_position))
+    temp_.insert(new_position, temp_.pop(old_position))
 
-    return list_
+    return temp_
 
 
 def difference_between_lists(input_list1, input_list2):

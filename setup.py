@@ -7,7 +7,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name='mpyez',
-    version='0.0.4',
+    version='0.0.5',
     packages=find_packages(where="src", exclude=['*tests*']),
     url='https://github.com/syedalimohsinbukhari/mpyez',
     license='MIT',
@@ -16,12 +16,12 @@ setup(
     description='Common use utilities for python done easy.',
     long_description=readme,
     long_description_content_type="text/markdown",
-    python_requires=">3.9, <3.12",
-    # install_requires=["astropy~=4.3.1", "numpy~=1.21.6", "setuptools~=59.6.0",
-    # "pillow~=9.1.1"],
+    python_requires=">=3.9, <3.12",
+    install_requires=["setuptools==70.0.0", "numpy==1.26.4", "matplotlib==3.9.1"],
     include_package_data=True,
     classifiers=[
         "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11"
     ],
