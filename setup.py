@@ -7,13 +7,13 @@ with open('README.md', 'r') as f:
 
 setup(
     name='mpyez',
-    version='0.0.5',
+    version='0.0.6',
     packages=find_packages(where="src", exclude=['*tests*']),
     url='https://github.com/syedalimohsinbukhari/mpyez',
     license='MIT',
     author='Syed Ali Mohsin Bukhari, Astrophysics and Python',
     author_email='syedali.b@outlook.com, astrophysicsandpython@gmail.com',
-    description='Common use utilities for python done easy.',
+    description='Common use backend for python done easy.',
     long_description=readme,
     long_description_content_type="text/markdown",
     python_requires=">=3.9, <3.12",

@@ -1,6 +1,6 @@
 """Created on Jul 23 18:38:52 2022."""
 
-from . import errors as _errors
+from .eIO import LineNumberOutOfBounds
 
 
 def check_for_errors(open_file, lines_to_read):
@@ -20,5 +20,4 @@ def check_for_errors(open_file, lines_to_read):
     else:
         err = False
     if err:
-        raise _errors.LineNumberOutOfBounds('The line number specified is outside the line numbers '
-                                            'of the file.')
+        raise LineNumberOutOfBounds('The line number specified is outside the line numbers of the file.')
