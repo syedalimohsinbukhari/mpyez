@@ -4,7 +4,7 @@ import itertools
 import os
 from typing import Union
 
-from . import errors as _errors
+from .eOS import FileNotPresent
 
 
 class GetFiles:
@@ -19,9 +19,7 @@ class GetFiles:
         self.__initialize_lof()
 
     def __initialize_lof(self):
-        """
-        Get the list of files from the input folder with the given extension(s).
-        """
+        """Get the list of files from the input folder with the given extension(s)."""
         if isinstance(self.input_variable, str):
             self.input_variable = (self.input_variable,)
 
@@ -50,9 +48,9 @@ class GetFiles:
         mask_ = [x not in self.lof for x in exclude_file]
 
         if True in mask_:
-            raise _errors.FileNotPresent(f'The file(s) named '
-                                         f'{", ".join(itertools.compress(exclude_file, mask_))} '
-                                         f'do not exist in the list of files.')
+            raise FileNotPresent(f'The file(s) named '
+                                 f'{", ".join(itertools.compress(exclude_file, mask_))} '
+                                 f'do not exist in the list of files.')
         else:
             tuple(self.lof.remove(x) for x in exclude_file)
 

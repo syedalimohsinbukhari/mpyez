@@ -37,40 +37,58 @@ implementations for details).
 
 ## Modules
 
-### Current implementations
+### Current Implementations
 
-1. `misc`
-   1. `is_numeric` : To check if the input is numeric or not.
-2. `os_`
-   1. `ListOfFilesFromExtensions` : To pick files of specific extensions
+---
+
+1. `os_`
+   1. `ListOfFilesFromExtensions`: To pick files of specific extensions.
    2. `ListOfFilesFromNames`: To pick files matching a specific name pattern.
-3. `list_`
-   1. `numeric_list_to_string` : To convert a list of numeric values to string.
-   2. `string_list_to_numeric` : To convert a list of string number values to numeric.
-   3. `nested_list_to_list` : To convert a nested list to 1D list.
-   4. `list_to_nested_list` : To convert a simple 1D list to a nested list.
-   5. `join_lists` : To join multiple lists into a single one
-   6. `Replace` : To replace values in a list, either by given value or by the index.
-   7. `is_contained` : To check if a given list is contained within another list.
-   8. `get_object_count`: To get an object count from the list. Has an added capability of returning sorted list of
-      objects or top N objects.
-   9. `sort_`: To sort a list. Can also return the sort indices.
-   10. `remove_`: To remove a value from a given list. Can also remove `tuple`, `str`, or a nested `list`.
-   11. `move_element_in_list`: To move a given element present in the list to a new location within the list.
-4. `read_files`
-   1. `read_text_file_in_a_list`: Reads an entire `txt` file.
-   2. `read_specific_lines_from_a_file`: Reads specific lines (index based) from a given `txt` file.
+   3. `move_directory_contents`: To move directory contents to a new location.
 
-### Future implementations
+2. `list_`
+   1. `difference_between_lists`: To get the difference between two lists.
+   2. `equal_lists`: To check if two lists are equal.
+   3. `get_object_count`: To get an object count from the list.
+   4. `index`: To get the index of an element in the list.
+   5. `is_contained`: To check if a list is contained within another list.
+   6. `join_lists`: To join multiple lists into a single one.
+   7. `list_to_nested_list`: To convert a list to a nested list.
+   8. `move_element_in_list`: To move a list element to a new position.
+   9. `nested_list_to_list`: To convert a nested list to a flat list.
+   10. `remove_`: To remove a value from a list.
+   11. `replace_at_index`: To replace values at a specific index in the list.
+   12. `replace_with_value`: To replace values with a given value in the list.
+   13. `sort_`: To sort a list.
+   14. `string_list_to_numeric`: To convert string values in a list to numeric.
+
+3. `read_files`
+   1. `read_txt_file`: To read an entire text file.
+   2. `get_lines_from_txt_file`: To read specific lines from a text file.
+
+4. `dict_`
+   1. `get_key_index`: To get the index of a key in a dictionary.
+   2. `merge_dictionaries`: To merge dictionaries.
+   3. `pretty_print`: To print a dictionary in a readable format.
+   4. `sort_dictionary`: To sort a dictionary.
+
+5. `array_`
+   1. `moving_average`: To calculate the moving average for an array.
+   2. `reshape_with_padding`: To reshape an array with padding.
+   3. `transpose1d`: To transpose a 1D array.
+
+6. `plotting_`
+   1. `plot_two_column_file`: To plot data from a two-column file.
+   2. `plot_xy`: To plot x vs. y data.
+   3. `plot_with_dual_axes`: To plot with dual axes for two datasets.
+
+---
+
+### Future Implementations
 
 1. `read_files`
-   1. Whole files using generator to reduce memory issues,
-   2. Implementation of reading other files, especially `.csv`.
-2. `dict_`
-   1. For handling dictionary manipulations methods easily. For example,
-      1. updating dictionaries,
-      2. index retrieval, and/or
-      3. dictionary comparisons.
-3. And more
+   1. Implementation of reading other file formats, especially `.csv`.
+   2. Whole file reading using generators to reduce memory issues.
 
-### Documentation: IN PROGRESS
+2. `dict_`
+   1. Additional dictionary manipulation methods such as updating, retrieval, and comparisons.

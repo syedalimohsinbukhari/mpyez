@@ -4,13 +4,11 @@ import os
 import shutil
 from typing import Union
 
-from .utilities.os_ import utilities
+from .backend.uOS import GetFiles
 
 
-class ListOfFilesFromExtensions(utilities.GetFiles):
-    """
-    Class for getting the list of files from a folder.
-    """
+class ListOfFilesFromExtensions(GetFiles):
+    """Class for getting the list of files from a folder."""
 
     def __init__(self, extension: Union[str, list], directory: str = os.curdir):
         """
@@ -41,13 +39,13 @@ class ListOfFilesFromExtensions(utilities.GetFiles):
 
         >>> list_of_files.exclude(exclude_file='remove_me.py')
         """
-
         super(ListOfFilesFromExtensions, self).__init__(input_variable=extension,
                                                         var_type='ext',
                                                         working_directory=directory)
 
 
-class ListOfFilesFromName(utilities.GetFiles):
+class ListOfFilesFromName(GetFiles):
+    """Class for getting the list of files from a folder."""
 
     def __init__(self, file_name: Union[str, list], directory: str = os.curdir):
         """
@@ -80,7 +78,6 @@ class ListOfFilesFromName(utilities.GetFiles):
 
         >>> list_of_files.exclude(exclude_file='remove_me.py')
         """
-
         super(ListOfFilesFromName, self).__init__(input_variable=file_name,
                                                   var_type='name',
                                                   working_directory=directory)
@@ -97,7 +94,6 @@ def move_directory_contents(old_path: str, new_path: str):
     new_path:
         The new directory to which the files are to be moved.
     """
-
     if not os.path.exists(old_path):
         raise Exception(f"The source directory '{old_path}' does not exist.")
 

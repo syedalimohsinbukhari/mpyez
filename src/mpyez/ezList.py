@@ -2,11 +2,11 @@
 
 import copy
 from collections import Counter
-from copy import deepcopy
 from itertools import chain, compress
 from typing import Any, List, Union
 
-from .utilities.list_ import errors, utilities
+from .backend import eList as eL
+from .backend.uList import CountObjectsInList, Replace
 
 
 def equal_lists(lists: list) -> bool:
@@ -33,34 +33,6 @@ def equal_lists(lists: list) -> bool:
     return len(set(map(len, lists))) == 1
 
 
-def numeric_list_to_string(num_list: List[int]) -> List[str]:
-    """
-    Convert all elements of a numeric lists to string.
-
-    Parameters
-    ----------
-    num_list : List[int]
-        A list containing numeric values.
-
-    Returns
-    -------
-    List[str]
-        A list containing strings equivalent to the numbers in the input list.
-
-    Examples
-    --------
-    Let's say we have
-
-    >>> a = [1, 2, 3, 4, 5]
-
-    and we want to convert each element in thist list to string,
-
-    >>> numeric_list_to_string(a)
-    >>> ['1', '2', '3', '4', '5']
-    """
-    return list(map(str, num_list))
-
-
 def string_list_to_numeric(str_list: list) -> list:
     """
     Convert all elements of a string lists to numeric.
@@ -83,8 +55,8 @@ def string_list_to_numeric(str_list: list) -> list:
     mask_ = [element.isalpha() for element in str_list]
 
     if any(mask_):
-        raise errors.AlphabetFound(f'An alphabet found in the list passed, '
-                                   f'{", ".join(compress(str_list, mask_))} cannot be processed.')
+        raise eL.AlphabetFound(f'An alphabet found in the list passed, '
+                               f'{", ".join(compress(str_list, mask_))} cannot be processed.')
 
     return list(map(int, str_list))
 
@@ -176,8 +148,6 @@ def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = Fa
         Whether the output should contain unique values or not. The default if False.
     sort : bool
         Whether the output should be sorted or not. The default is False.
-    tuples_as_lists : bool
-        Whether the tuples in output should be converted to list or not. The default is False.
 
     Returns
     -------
@@ -215,76 +185,14 @@ def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = Fa
     return out_list
 
 
-class Replace:
+def replace_at_index(input_list: list, work_on: Union[list, int], replace_with: Union[list, int],
+                     new_list: bool = False):
+    return Replace(input_list, work_on, replace_with, new_list).at_index()
 
-    def __init__(self, input_list: list, work_on: Union[list, int], replace_with: Union[list, int], by: str = 'index',
-                 new_list: list = False):
-        self.input_list = deepcopy(input_list) if new_list else input_list
-        self.work_on = work_on
-        self.replace_with = replace_with
-        self.by = by
 
-    def __convert_inputs_to_lists(self):
-        if not isinstance(self.work_on, list):
-            self.work_on = [self.work_on]
-
-        if not isinstance(self.replace_with, list):
-            self.replace_with = [self.replace_with]
-
-        return self.work_on, self.replace_with
-
-    def __equalizing_list_length(self) -> list:
-        if self.by == 'index':
-            names = ['index', 'value']
-        elif self.by == 'value':
-            names = ['old_elements', 'new_elements']
-        else:
-            raise errors.InvalidInputParameter('The input parameter required is, \'index\', or \'value\'.')
-
-        if len(self.replace_with) != len(self.work_on):
-            raise errors.UnequalElements(f'The number of elements in the {names[0]} list is not '
-                                         f'equal to that of {names[1]}. Cannot perform '
-                                         f'replacement in this case.')
-
-        return self.replace_with
-
-    def __replace_values(self, primary_list=None) -> None:
-        primary_list = self.work_on if primary_list is None else primary_list
-
-        for index, value in zip(primary_list, self.replace_with):
-            self.input_list[index] = value
-
-    def at_index(self) -> list:
-        self.work_on, self.replace_with = self.__convert_inputs_to_lists()
-        self.replace_with = self.__equalizing_list_length()
-
-        bool_mask = [_index > len(self.input_list) - 1 for _index in self.work_on]
-
-        if any(bool_mask):
-            join_ = ", ".join(compress(numeric_list_to_string(self.replace_with), bool_mask))
-            raise errors.IndexOutOfList(f'Index {join_} is out of bound for a list of length '
-                                        f'{len(self.input_list)}.')
-
-        self.__replace_values()
-
-        return self.input_list
-
-    def at_value(self) -> list:
-        self.work_on, self.replace_with = self.__convert_inputs_to_lists()
-        self.replace_with = self.__equalizing_list_length()
-
-        bool_mask = [element not in self.input_list for element in self.work_on]
-
-        if any(bool_mask):
-            join_ = ", ".join(compress(numeric_list_to_string(self.work_on), bool_mask))
-            raise errors.GotAnUnknownValue(f'The value {join_} given in old_element does not exist '
-                                           f'in the input_list.')
-
-        index = [self.input_list.index(element) for element in self.work_on]
-
-        self.__replace_values(primary_list=index)
-
-        return self.input_list
+def replace_with_value(input_list: list, work_on: Union[list, int], replace_with: Union[list, int],
+                       new_list: bool = False):
+    return Replace(input_list, work_on, replace_with, new_list, 'value').at_value()
 
 
 def is_contained(child_list: list, parent_list: list) -> bool:
@@ -345,7 +253,7 @@ def get_object_count(input_list: list, top_n: float = -1, get_tabular_form: bool
     counts = dict(Counter(input_list))
 
     if get_tabular_form:
-        obj_ = utilities.CountObjectsInList(counts)
+        obj_ = CountObjectsInList(counts)
         count_obj = obj_[:] if top_n == -1 else obj_ if top_n == 0 else obj_[0: top_n]
     else:
         count_obj = counts
@@ -442,12 +350,34 @@ def move_element_in_list(input_list: list, old_position: Union[list, int], new_p
 
 
 def difference_between_lists(input_list1, input_list2):
+    """
+
+    Parameters
+    ----------
+    input_list1
+    input_list2
+
+    Returns
+    -------
+
+    """
     diff1 = [element for element in input_list1 if element not in input_list2]
     diff2 = [element for element in input_list2 if element not in input_list1]
     return diff1, diff2
 
 
 def index_(input_list, iterator):
+    """
+
+    Parameters
+    ----------
+    input_list
+    iterator
+
+    Returns
+    -------
+
+    """
     if isinstance(iterator, int):
         return input_list.index(iterator)
     else:

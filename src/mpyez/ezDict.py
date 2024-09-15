@@ -2,14 +2,32 @@
 
 from typing import Any, Dict
 
-from .utilities.dict_ import utilities
+from .backend.uDict import PrettyPrint
 
 
-def sort_dictionary(input_dictionary, sort_by='values', sort_reverse=False):
-    def get_key(x):
+def sort_dictionary(input_dictionary, sort_by='values', sort_reverse=False) -> dict:
+    """
+    Sorts dictionary either by value or by keys.
+
+    Parameters
+    ----------
+    input_dictionary:
+        The given dictionary to be sorted.
+    sort_by:
+        The parameter to sort the dictionary on, either 'values' or 'keys'. Defaults to 'values'.
+    sort_reverse:
+        Whether to reverse sort the dictionary or not.
+
+    Returns
+    -------
+    dict:
+        Sorted dictionary
+    """
+
+    def _get_key(x):
         return x[1] if sort_by == 'values' else x[0]
 
-    return dict(sorted(input_dictionary.items(), key=get_key, reverse=sort_reverse))
+    return dict(sorted(input_dictionary.items(), key=_get_key, reverse=sort_reverse))
 
 
 def merge_dictionaries(*dicts: Dict[str, Any]) -> Dict[str, Any]:
@@ -41,8 +59,21 @@ def merge_dictionaries(*dicts: Dict[str, Any]) -> Dict[str, Any]:
     return merged_dict
 
 
-def pretty_print(input_dictionary):
-    return utilities.PrettyPrint(input_dictionary)
+def pretty_print(input_dictionary) -> PrettyPrint:
+    """
+    Pretty prints the given dictionary.
+
+    Parameters
+    ----------
+    input_dictionary:
+        The dictionary to be pretty-printed.
+
+    Returns
+    -------
+    PrettyPrint:
+        PrettyPrinted dictionary.
+    """
+    return PrettyPrint(input_dictionary)
 
 
 def get_key_index(input_dictionary: dict, key: object) -> int:

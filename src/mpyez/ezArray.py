@@ -5,12 +5,12 @@ import numpy as np
 
 def transpose1d(array: np.ndarray) -> np.ndarray:
     """
-    Transposes a given 1D array.
+    Transposes a given array.
 
     Parameters
     ----------
     array:
-        Given 1D numpy array.
+        Given numpy array.
 
     Returns
     -------
@@ -18,7 +18,7 @@ def transpose1d(array: np.ndarray) -> np.ndarray:
         Transposed numpy array
     """
 
-    return np.array([array]).transpose()
+    return np.array([array]).transpose() if len(array.shape) == 1 else array.transpose()
 
 
 def reshape_with_padding(array: np.ndarray, new_shape: tuple, pad_value: int = 0) -> np.ndarray:
@@ -39,17 +39,6 @@ def reshape_with_padding(array: np.ndarray, new_shape: tuple, pad_value: int = 0
     -------
     np.ndarray
         The reshaped array with padding applied if necessary.
-
-    Example
-    -------
-    >>> arr = np.array([1, 2, 3])
-    >>> reshape_with_padding(arr,(2, 3))
-    array([[1, 2, 3],
-           [0, 0, 0]])
-
-    >>> reshape_with_padding(arr,(2, 2),pad_value=-1)
-    array([[ 1,  2],
-           [ 3, -1]])
     """
 
     new_array = np.full(new_shape, pad_value)
