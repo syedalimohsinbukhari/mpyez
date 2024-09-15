@@ -2,20 +2,19 @@
 
 import unittest
 
-import src.mpyez.backend.uList
-from src.mpyez import ezList
-from src.mpyez.backend import eList
-from src.mpyez.ezList import replace_at_index, replace_with_value
+from ..mpyez import ezList
+from ..mpyez.backend import uList
+from ..mpyez.backend.eList import AlphabetFound, UnequalElements
 
 
 class Test(unittest.TestCase):
     def test_numeric_list_to_string(self):
-        self.assertEqual(src.mpyez.backend.uList.numeric_list_to_string([1, 2, 3]), ['1', '2', '3'])
+        self.assertEqual(uList.numeric_list_to_string([1, 2, 3]), ['1', '2', '3'])
 
     def test_string_list_to_numeric(self):
         self.assertEqual(ezList.string_list_to_numeric(['1', '2', '3']), [1, 2, 3])
 
-        with self.assertRaises(eList.AlphabetFound):
+        with self.assertRaises(AlphabetFound):
             ezList.string_list_to_numeric(['A'])
 
     def test_nested_list_to_list(self):
@@ -44,20 +43,20 @@ class Test(unittest.TestCase):
     def test_Replace__single_index(self):
         inp_, ind_, wth_ = [1, 2, 3, 4, 5], 0, 10
 
-        self.assertEqual(replace_at_index(inp_, ind_, wth_), [10, 2, 3, 4, 5])
+        self.assertEqual(ezList.replace_at_index(inp_, ind_, wth_), [10, 2, 3, 4, 5])
 
     def test_Replace__multi_index(self):
         inp_, ind_, wth_ = [1, 2, 3, 4, 5], [0, 2, 3], [10, 10, 10]
 
-        self.assertEqual(replace_at_index(inp_, ind_, wth_), [10, 2, 10, 10, 5])
+        self.assertEqual(ezList.replace_at_index(inp_, ind_, wth_), [10, 2, 10, 10, 5])
 
     def test_Replace__single_index__multiple_values(self):
         inp_, ind_, wth_ = [1, 2, 3, 4, 5], 0, [10, 10, 10]
 
-        with self.assertRaises(eList.UnequalElements):
-            replace_at_index(inp_, ind_, wth_)
+        with self.assertRaises(UnequalElements):
+            ezList.replace_at_index(inp_, ind_, wth_)
 
     def test_Replace__multi_value(self):
         inp_, val_, wth_ = [1, 2, 3, 4, 5], [2, 3], [10, 12]
 
-        self.assertEqual(replace_with_value(inp_, val_, wth_), [1, 10, 12, 4, 5])
+        self.assertEqual(ezList.replace_with_value(inp_, val_, wth_), [1, 10, 12, 4, 5])

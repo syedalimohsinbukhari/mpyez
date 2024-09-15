@@ -1,6 +1,8 @@
 """Created on Jul 23 23:41:18 2024"""
 
-from typing import Dict, Optional, Tuple
+__all__ = ['plot_two_column_file', 'plot_xy', 'plot_with_dual_axes']
+
+from typing import Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,251 +10,184 @@ import numpy as np
 
 # TODO:
 #   See what more plotting keywords can be added here
+#   See if the kwargs are working or not with the new `set_labels_and_title`
+#   Check if the `plt` objects returned are compatible with both axes in their respective functions.
 
 
-def set_labels_and_title(auto_label: bool, default_labels: Dict[str, str], **kwargs) -> Dict[str, str]:
+def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool = False, auto_label: bool = False,
+                         fig_size: Tuple[int, int] = (12, 5), is_scatter: bool = False, axis=None) -> plt:
     """
-    Helper function to set labels and title for the plots.
+    Reads a two-column file (x, y) and plots the data.
 
-    Parameters
-    ----------
-    auto_label : bool
-        If True, automatically set the labels and title with default values.
-    default_labels : dict
-        A dictionary containing default labels and title.
-    kwargs : dict
-        The keyword arguments provided to the plotting function.
-
-    Returns
-    -------
-    labels : dict
-        A dictionary with the final labels and title.
-    """
-    labels = {key: kwargs.get(key, default_labels[key]) for key in default_labels}
-    if auto_label:
-        labels.update(default_labels)
-    return labels
-
-
-def two_column_file(file_name: str, delimiter: str = ',', fig_size: Tuple[int, int] = (12, 5), auto_label: bool = False,
-                    **plt_kwargs: Dict[str, Optional[str]]) -> plt:
-    """
-    Plots data from a simple two-column file.
+    This function reads a file containing two columns (e.g., x and y values) and plots them
+    using either a line plot or scatter plot based on the user's preference.
 
     Parameters
     ----------
     file_name : str
-        The name of the file to be plotted.
+        The path to the file to be plotted. The file should contain two columns (x and y data).
     delimiter : str, optional
-        The delimiter to be used with the CSV file (default is ',').
-    fig_size : tuple of int, optional
-        The figure size to be used by the plot (default is (12, 5)).
+        The delimiter used in the file (default is ',').
+    skip_header: bool, optional
+        If True, skips the first row in the given data file, otherwise does nothing (defaults to False).
     auto_label : bool, optional
-        If True, automatically set the labels and title (default is False).
-    plt_kwargs : dict, optional
-        Additional keyword arguments to customize the plot (e.g., line style).
+        If True, automatically sets the x-axis label, y-axis label, and plot title (default is False).
+    fig_size : tuple of int, optional
+        The size of the plot figure, only used if a new plot is created (default is (12, 5)).
+    is_scatter : bool, optional
+        If True, creates a scatter plot. Otherwise, creates a line plot (default is False).
+    axis : matplotlib axis, optional
+        A specific matplotlib axis object to plot on. If None, a new plot is created (default is None).
 
     Returns
     -------
     plt : matplotlib.pyplot
-        The matplotlib.pyplot object for the plot.
+        The matplotlib.pyplot object for the generated plot.
     """
-    # Default labels and title
-    default_labels = {
-        'x_label': 'X',
-        'y_label': 'Y',
-        'data_label': 'data',
-        'plot_title': 'Plot between X and Y data'
-    }
+    data = np.genfromtxt(file_name, delimiter=delimiter, skip_header=skip_header)
 
-    # Set the labels and title
-    labels = set_labels_and_title(auto_label, default_labels, **plt_kwargs)
+    if data.shape[1] != 2:
+        raise ValueError("The file must contain exactly two columns of data.")
 
-    # Load the data from the CSV file
-    data = np.genfromtxt(file_name, delimiter=delimiter)
-    x, y = data.T
+    x_data, y_data = data.T
 
-    # Create the figure and plot the data
-    plt.figure(figsize=fig_size)
-    plt.plot(x, y, label=labels['data_label'], ls=plt_kwargs.get('ls', '-'), lw=plt_kwargs.get('lw', 1))
-
-    # Set the labels and title
-    plt.xlabel(labels['x_label'])
-    plt.ylabel(labels['y_label'])
-    plt.title(labels['plot_title'])
-
-    # Add legend and improve layout
-    plt.legend(loc='best')
-    plt.tight_layout()
-
-    return plt
+    return plot_xy(x_data, y_data, auto_label, fig_size, is_scatter, axis)
 
 
-def plot_xy(x_data: np.ndarray, y_data: np.ndarray, fig_size: Tuple[int, int] = (12, 5), auto_label: bool = False,
-            **plt_kwargs: Dict[str, Optional[str]]) -> plt:
+def plot_xy(x_data: np.ndarray, y_data: np.ndarray, auto_label: bool = False, fig_size: Tuple[int, int] = (12, 5),
+            is_scatter: bool = False, axis=None) -> plt:
     """
-    Plots x_data against y_data with various customization options.
+    Plots x_data against y_data with customizable options.
 
-    Parameters
-    ----------
-    x_data : list of float
-        The data for the x-axis.
-    y_data : list of float
-        The data for the y-axis.
-    fig_size : tuple of int, optional
-        The size of the figure (default is (12, 5)).
-    auto_label : bool, optional
-        If True, automatically set the labels and title (default is False).
-    plt_kwargs : dict, optional
-        Additional keyword arguments to customize the plot (e.g., labels, title).
-
-    Returns
-    -------
-    plt : matplotlib.pyplot
-        The matplotlib.pyplot object for the plot.
-    """
-    # Default labels and title
-    default_labels = {
-        'x_label': 'X',
-        'y_label': 'Y',
-        'data_label': 'data',
-        'plot_title': 'Plot between X and Y data'
-    }
-
-    # Set the labels and title
-    labels = set_labels_and_title(auto_label, default_labels, **plt_kwargs)
-
-    # Create the figure and plot the data
-    plt.figure(figsize=fig_size)
-    plt.plot(x_data, y_data, label=labels['data_label'])
-
-    # Set the labels and title
-    plt.xlabel(labels['x_label'])
-    plt.ylabel(labels['y_label'])
-    plt.title(labels['plot_title'])
-
-    # Add legend and improve layout
-    plt.legend(loc='best')
-    plt.tight_layout()
-
-    return plt
-
-
-def plot_xyy(x_data: np.ndarray, y1_data: np.ndarray, y2_data: np.ndarray, fig_size: Tuple[int, int] = (12, 5),
-             auto_label: bool = False, **plt_kwargs: Dict[str, Optional[str]]) -> plt:
-    """
-    Plots a dual y-axis plot with two different y-axis data sets.
+    This function accepts two arrays of data (x and y) and plots them using either
+    a line plot or scatter plot, with options for labels and figure size.
 
     Parameters
     ----------
     x_data : np.ndarray
         The data for the x-axis.
-    y1_data : np.ndarray
-        The data for the first y-axis.
-    y2_data : np.ndarray
-        The data for the second y-axis.
-    fig_size : tuple of int, optional
-        The size of the figure (default is (12, 5)).
+    y_data : np.ndarray
+        The data for the y-axis.
     auto_label : bool, optional
-        If True, automatically set the labels and title (default is False).
-    plt_kwargs : dict, optional
-        Additional keyword arguments to customize the plot (e.g., labels, title).
+        If True, automatically sets x and y-axis labels and the plot title (default is False).
+    fig_size : tuple of int, optional
+        The size of the plot figure (default is (12, 5)).
+    is_scatter : bool, optional
+        If True, creates a scatter plot. Otherwise, creates a line plot (default is False).
+    axis : matplotlib axis, optional
+        A specific matplotlib axis object to plot on. If None, a new plot is created (default is None).
 
-    Returns
-    -------
     Returns
     -------
     plt : matplotlib.pyplot
-        The matplotlib.pyplot object for the plot.
+        The matplotlib.pyplot object for the generated plot.
     """
-    # Default labels and title
-    default_labels = {
-        'x_label': 'X',
-        'y1_label': 'Y1',
-        'y2_label': 'Y2',
-        'data1_label': 'data1',
-        'data2_label': 'data2',
-        'plot_title': 'TwinX plot between X, Y1, and Y2'
-    }
+    plotter = axis if axis else plt
+    if not axis:
+        plotter.figure(figsize=fig_size)
 
-    # Set the labels and title
-    labels = set_labels_and_title(auto_label, default_labels, **plt_kwargs)
+    if is_scatter:
+        plot_function = plotter.scatter
+    else:
+        plot_function = plotter.plot
 
-    # Create the figure
-    plt.figure(figsize=fig_size)
+    plot_function(x_data, y_data)
 
-    # Plot the first y-axis data
-    plt.plot(x_data, y1_data, label=labels['data1_label'])
-    plt.xlabel(labels['x_label'])
-    plt.ylabel(labels['y1_label'])
-    plt.title(labels['plot_title'])
+    if auto_label:
+        label_functions = {'x_label': plotter.set_xlabel if axis else plotter.xlabel,
+                           'y_label': plotter.set_ylabel if axis else plotter.ylabel,
+                           'title': plotter.set_title if axis else plotter.title}
 
-    # Create the second y-axis and plot the data
-    plt.twinx()
-    plt.plot(x_data, y2_data, label=labels['data2_label'])
-    plt.ylabel(labels['y2_label'])
+        label_functions['x_label']('X-axis')
+        label_functions['y_label']('Y-axis')
+        label_functions['title']('X vs Y Plot')
+        plotter.legend(loc='best')
+        plotter.tight_layout()
 
-    # Add legend and improve layout
-    plt.legend(loc='best')
-    plt.tight_layout()
-
-    return plt
+    return plotter
 
 
-def plot_xxy(y_data: np.ndarray, x1_data: np.ndarray, x2_data: np.ndarray, fig_size: Tuple[int, int] = (12, 5),
-             auto_label: bool = False, **plt_kwargs: Dict[str, Optional[str]]) -> plt:
+def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
+                        x2_data: Optional[np.ndarray] = None, y2_data: Optional[np.ndarray] = None,
+                        x1y1_label: str = 'X1 vs Y1', x1y2_label: str = 'X1 vs Y2', x2y1_label: str = 'X2 vs Y1',
+                        is_dual_y: bool = False, auto_label: bool = False, fig_size: Tuple[int, int] = (12, 5),
+                        is_scatter: bool = False, color_y2: str = 'red', legend_loc: str = 'best') -> plt:
     """
-    Plots a dual x-axis plot with two different x-axis data sets.
+    Plots data with options for dual axes (x or y) or single axis.
 
     Parameters
     ----------
-    y_data : np.ndarray
-        The data for the y-axis.
     x1_data : np.ndarray
-        The data for the first x-axis.
-    x2_data : np.ndarray
-        The data for the second x-axis.
-    fig_size : tuple of int, optional
-        The size of the figure (default is (12, 5)).
+        Data for the primary x-axis.
+    y1_data : np.ndarray
+        Data for the primary y-axis.
+    x2_data : np.ndarray, optional
+        Data for the secondary x-axis (used for dual x-axis plots).
+    y2_data : np.ndarray, optional
+        Data for the secondary y-axis (used for dual y-axis plots).
+    x1y1_label : str, optional
+        Label for the plot of X1 vs Y1. Default is 'X1 vs Y1'.
+    x1y2_label : str, optional
+        Label for the plot of X1 vs Y2 (when using dual Y-axes). Default is 'X1 vs Y2'.
+    x2y1_label : str, optional
+        Label for the plot of X2 vs Y1 (when using dual X-axes). Default is 'X2 vs Y1'.
+    is_dual_y : bool, optional
+        If True, creates dual y-axis plot. If False, creates dual x-axis plot. Default is False.
     auto_label : bool, optional
-        If True, automatically set the labels and title (default is False).
-    plt_kwargs : dict, optional
-        Additional keyword arguments to customize the plot (e.g., labels, title).
+        If True, automatically labels the axes and plot title. Default is False.
+    fig_size : Tuple[int, int], optional
+        Figure size for the plot. Default is (12, 5).
+    is_scatter : bool, optional
+        If True, creates scatter plot; otherwise, line plot. Default is False.
+    color_y2 : str, optional
+        Color for the secondary y-axis or X2 axis plot (default is 'red').
+    legend_loc : str, optional
+        Location of the legend (default is 'best').
 
     Returns
     -------
     plt : matplotlib.pyplot
-        The matplotlib.pyplot object for the plot.
+        The matplotlib.pyplot object for the generated plot.
+    [fig, (ax1, ax2)] or [fig, ax1] depending on the presence of dual axes.
     """
-    # Default labels and title
-    default_labels = {
-        'y_label': 'Y',
-        'x1_label': 'X1',
-        'x2_label': 'X2',
-        'data1_label': 'data1',
-        'data2_label': 'data2',
-        'plot_title': 'TwinX plot between X1, X2, and Y'
-    }
+    if is_dual_y and y2_data is None:
+        raise ValueError("Dual Y-axis plot requested but 'y2_data' is None.")
+    if not is_dual_y and x2_data is None:
+        raise ValueError("Dual X-axis plot requested but 'x2_data' is None.")
+    if len(x1_data) == 0 or len(y1_data) == 0:
+        raise ValueError("Primary x or y data is empty. Please provide valid data.")
 
-    # Set the labels and title
-    labels = set_labels_and_title(auto_label, default_labels, **plt_kwargs)
+    fig, ax1 = plt.subplots(figsize=fig_size)
 
-    # Create the figure
-    plt.figure(figsize=fig_size)
+    def _plot_or_scatter(ax, scatter):
+        return ax.scatter if scatter else ax.plot
 
-    # Plot the first x-axis data
-    plt.plot(x1_data, y_data, label=labels['data1_label'])
-    plt.xlabel(labels['x1_label'])
-    plt.ylabel(labels['y_label'])
-    plt.title(labels['plot_title'])
+    _plot_or_scatter(ax1, is_scatter)(x1_data, y1_data, label=x1y1_label)
 
-    # Create the second x-axis and plot the data
-    ax2 = plt.twiny()
-    ax2.plot(x2_data, y_data, label=labels['data2_label'], color='orange')
-    ax2.set_xlabel(labels['x2_label'])
+    if auto_label:
+        ax1.set_xlabel('X1')
+        ax1.set_ylabel('Y1')
+        ax1.set_title('Plot')
 
-    # Add legend and improve layout
-    plt.legend(loc='best')
+    if is_dual_y:
+        ax2 = ax1.twinx()
+        _plot_or_scatter(ax2, is_scatter)(x1_data, y2_data, label=x1y2_label, color=color_y2)
+        if auto_label:
+            ax2.set_ylabel('Y2')
+    else:
+        ax2 = ax1.twiny()
+        _plot_or_scatter(ax2, is_scatter)(x2_data, y1_data, label=x2y1_label, color=color_y2)
+        if auto_label:
+            ax2.set_xlabel('X2')
+
+    handles, labels = ax1.get_legend_handles_labels()
+    if ax2:
+        handles2, labels2 = ax2.get_legend_handles_labels()
+        handles += handles2
+        labels += labels2
+
+    ax1.legend(handles, labels, loc=legend_loc)
+
     plt.tight_layout()
 
-    return plt
+    return [fig, (ax1, ax2)] if ax2 else [fig, ax1]
