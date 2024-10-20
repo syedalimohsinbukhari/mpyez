@@ -23,7 +23,6 @@ def sort_dictionary(input_dictionary, sort_by='values', sort_reverse=False) -> d
     dict:
         Sorted dictionary
     """
-
     def _get_key(x):
         return x[1] if sort_by == 'values' else x[0]
 

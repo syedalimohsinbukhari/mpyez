@@ -17,7 +17,6 @@ def transpose1d(array: np.ndarray) -> np.ndarray:
     np.ndarray
         Transposed numpy array
     """
-
     return np.array([array]).transpose() if len(array.shape) == 1 else array.transpose()
 
 
@@ -40,7 +39,6 @@ def reshape_with_padding(array: np.ndarray, new_shape: tuple, pad_value: int = 0
     np.ndarray
         The reshaped array with padding applied if necessary.
     """
-
     new_array = np.full(new_shape, pad_value)
     new_array.flat[:len(array)] = array
 
@@ -63,5 +61,4 @@ def moving_average(array: np.ndarray, window_size: int) -> np.ndarray:
     np.ndarray
         An array containing the moving averages. The length of this array will be `len(array) - window_size + 1`.
     """
-
     return np.convolve(array, np.ones(window_size), 'valid') / window_size

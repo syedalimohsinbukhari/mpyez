@@ -132,7 +132,6 @@ def list_to_nested_list(input_list: list, n_elements: int) -> List[list]:
     >>> list_to_nested_list(a, 4)
     >>> [[1, 2, 3, 4], [5, 6, 7, 8], [9]]
     """
-
     return [input_list[i:i + n_elements] for i in range(0, len(input_list), n_elements)]
 
 
@@ -185,16 +184,6 @@ def join_lists(input_lists: List[Any], get_unique: bool = False, sort: bool = Fa
     return out_list
 
 
-def replace_at_index(input_list: list, work_on: Union[list, int], replace_with: Union[list, int],
-                     new_list: bool = False):
-    return Replace(input_list, work_on, replace_with, new_list).at_index()
-
-
-def replace_with_value(input_list: list, work_on: Union[list, int], replace_with: Union[list, int],
-                       new_list: bool = False):
-    return Replace(input_list, work_on, replace_with, new_list, 'value').at_value()
-
-
 def is_contained(child_list: list, parent_list: list) -> bool:
     """
     Check if the child_list is contained within the parent_list.
@@ -226,7 +215,6 @@ def is_contained(child_list: list, parent_list: list) -> bool:
     >>> is_contained(a, b)
     >>> True
     """
-
     return all(child in parent_list for child in child_list)
 
 
@@ -349,34 +337,90 @@ def move_element_in_list(input_list: list, old_position: Union[list, int], new_p
     return temp_
 
 
-def difference_between_lists(input_list1, input_list2):
+def replace_at_index(input_list: list, work_on: Union[list, int], replace_with: Union[list, int], new_list: bool = False):
     """
+    Replace elements in `input_list` at specific indices.
 
     Parameters
     ----------
-    input_list1
-    input_list2
+    input_list : list
+        The original list to modify.
+    work_on : Union[list, int]
+        A single index or a list of indices where elements will be replaced.
+    replace_with : Union[list, int]
+        A single value or list of values that will replace the existing elements at the specified indices.
+    new_list : bool, optional
+        If True, returns a new list with the replacements. Otherwise, modifies the original list in place. Default is False.
 
     Returns
     -------
+    list
+        The modified list with replaced values.
+    """
+    return Replace(input_list, work_on, replace_with, new_list).at_index()
 
+
+def replace_with_value(input_list: list, work_on: Union[list, int], replace_with: Union[list, int], new_list: bool = False):
+    """
+    Replace specific values in `input_list` with new values.
+
+    Parameters
+    ----------
+    input_list : list
+        The original list to modify.
+    work_on : Union[list, int]
+        A single value or list of values that will be replaced in the list.
+    replace_with : Union[list, int]
+        A single value or list of values that will replace the specified values.
+    new_list : bool, optional
+        If True, returns a new list with the replacements. Otherwise, modifies the original list in place. Default is False.
+
+    Returns
+    -------
+    list
+        The modified list with replaced values.
+    """
+    return Replace(input_list, work_on, replace_with, new_list, 'value').at_value()
+
+
+def difference_between_lists(input_list1: list, input_list2: list):
+    """
+    Find the differences between two lists.
+
+    Parameters
+    ----------
+    input_list1 : list
+        The first list to compare.
+    input_list2 : list
+        The second list to compare.
+
+    Returns
+    -------
+    tuple of lists
+        Two lists representing the differences:
+        - First list contains elements in `input_list1` not in `input_list2`.
+        - Second list contains elements in `input_list2` not in `input_list1`.
     """
     diff1 = [element for element in input_list1 if element not in input_list2]
     diff2 = [element for element in input_list2 if element not in input_list1]
     return diff1, diff2
 
 
-def index_(input_list, iterator):
+def index_(input_list: list, iterator: Union[list, int]):
     """
+    Get the index or indices of specific values in `input_list`.
 
     Parameters
     ----------
-    input_list
-    iterator
+    input_list : list
+        The list to search for values.
+    iterator : Union[list, int]
+        A single value or list of values for which indices will be returned.
 
     Returns
     -------
-
+    Union[int, list of int]
+        The index of the value if `iterator` is a single value, or a list of indices if `iterator` is a list.
     """
     if isinstance(iterator, int):
         return input_list.index(iterator)
