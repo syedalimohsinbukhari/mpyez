@@ -7,11 +7,12 @@ from typing import Optional, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .backend.ePlotting import DoubleLinePlot, DoubleScatterPlot, rc_color
+from .backend.ePlotting import LinePlot, ScatterPlot
 
 # safeguard
-double_scatter_plot = "DoubleScatterPlot"
-double_line_plot = "DoubleLinePlot"
+line_plot = "LinePlot"
+scatter_plot = "ScatterPlot"
+plot_dictionary_type = Optional[Union[LinePlot, ScatterPlot]]
 
 
 # TODO:
@@ -21,7 +22,7 @@ double_line_plot = "DoubleLinePlot"
 
 
 def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool = False, auto_label: bool = False,
-                         fig_size: Tuple[int, int] = (12, 5), is_scatter: bool = False) -> plt:
+                         fig_size: Tuple[int, int] = (12, 5), is_scatter: bool = False, plot_dictionary: plot_dictionary_type = None) -> plt:
     """
     Reads a two-column file (x, y) and plots the data.
 
@@ -42,6 +43,9 @@ def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool
         The size of the plot figure, only used if a new plot is created (default is (12, 5)).
     is_scatter : bool, optional
         If True, creates a scatter plot. Otherwise, creates a line plot (default is False).
+    plot_dictionary: Union[LinePlot, ScatterPlot], optional
+        An object representing the plot data, either a `LinePlot` or `ScatterPlot`,  to be passed to the matplotlib plotting library.
+         If None, a default plot type will be used.
 
     Returns
     -------
@@ -55,11 +59,12 @@ def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool
 
     x_data, y_data = data.T
 
-    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter)
+    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter,
+                               plot_dictionary=plot_dictionary)
 
 
 def plot_xy(x_data: np.ndarray, y_data: np.ndarray, auto_label: bool = False, fig_size: Tuple[int, int] = (12, 5),
-            is_scatter: bool = False) -> plt:
+            is_scatter: bool = False, plot_dictionary: plot_dictionary_type = None) -> plt:
     """
     Plots x_data against y_data with customizable options.
 
@@ -78,26 +83,29 @@ def plot_xy(x_data: np.ndarray, y_data: np.ndarray, auto_label: bool = False, fi
         The size of the plot figure (default is (12, 5)).
     is_scatter : bool, optional
         If True, creates a scatter plot. Otherwise, creates a line plot (default is False).
+    plot_dictionary: Union[LinePlot, ScatterPlot], optional
+        An object representing the plot data, either a `LinePlot` or `ScatterPlot`,  to be passed to the matplotlib plotting library.
+         If None, a default plot type will be used.
 
     Returns
     -------
     plt : matplotlib.pyplot
         The matplotlib.pyplot object for the generated plot.
     """
-    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter)
+    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter,
+                               plot_dictionary=plot_dictionary)
 
 
 def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
                         x2_data: Optional[np.ndarray] = None, y2_data: Optional[np.ndarray] = None,
                         x1y1_label: str = 'X1 vs Y1', x1y2_label: str = 'X1 vs Y2', x2y1_label: str = 'X2 vs Y1',
                         use_twin_x: bool = False, auto_label: bool = False, fig_size: Tuple[int, int] = (12, 5),
-                        is_scatter: bool = False, plot_dictionary: Union[DoubleLinePlot, DoubleScatterPlot] = None) -> plt:
+                        is_scatter: bool = False, plot_dictionary: plot_dictionary_type = None) -> plt:
     """
     Plots data with options for dual axes (x or y) or single axis.
 
     Parameters
     ----------
-    plot_dictionary
     x1_data : np.ndarray
         Data for the primary x-axis.
     y1_data : np.ndarray
@@ -120,6 +128,9 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
         Figure size for the plot. Default is (12, 5).
     is_scatter : bool, optional
         If True, creates scatter plot; otherwise, line plot. Default is False.
+    plot_dictionary: Union[LinePlot, ScatterPlot], optional
+        An object representing the plot data, either a `LinePlot` or `ScatterPlot`,  to be passed to the matplotlib plotting library.
+         If None, a default plot type will be used.
 
     Returns
     -------
@@ -139,12 +150,18 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     def _plot_or_scatter(ax, scatter):
         return ax.scatter if scatter else ax.plot
 
-    if plot_dictionary.__class__.__name__ in [double_line_plot, double_scatter_plot]:
-        dict1 = {key: value[0] for key, value in plot_dictionary.get().items()}
-
-        dict2 = {key: value[1] for key, value in plot_dictionary.get().items()}
+    if plot_dictionary:
+        plot_items = plot_dictionary.get().items()
+    elif is_scatter:
+        plot_items = ScatterPlot().get().items()
     else:
-        dict1, dict2 = {'c': rc_color[0]}, {'c': rc_color[1]}
+        plot_items = LinePlot().get().items()
+
+    dict1 = {key: (value[0] if isinstance(value, list) else value) for key, value in plot_items}
+
+    # Check the condition once before creating dict2
+    use_secondary_values = x2_data is not None or y2_data is not None or use_twin_x
+    dict2 = {key: (value[1] if use_secondary_values else None) for key, value in plot_items}
 
     _plot_or_scatter(ax1, is_scatter)(x1_data, y1_data, label=x1y1_label, **dict1)
 

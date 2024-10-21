@@ -1,12 +1,14 @@
 """Created on Oct 21 00:12:02 2024"""
 
+__all__ = ['LinePlot', 'ScatterPlot']
+
 from matplotlib import pyplot as plt
 
 # Access the default color cycle
 rc_color = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
 
-class PlotParams:
+class _PlotParams:
     """
     Base class for handling common plot parameters.
 
@@ -84,13 +86,13 @@ class PlotParams:
         raise NotImplementedError("This method should be implemented by subclasses.")
 
 
-class DoubleLinePlot(PlotParams):
+class LinePlot(_PlotParams):
     """
     Class for double-line plot parameters.
 
     Parameters
     ----------
-    All parameters are inherited from `PlotParams`.
+    All parameters are inherited from `_PlotParams`.
     """
 
     def __init__(self,
@@ -98,8 +100,8 @@ class DoubleLinePlot(PlotParams):
                  color=None, alpha=None,
                  marker=None, marker_size=None,
                  marker_edge_color=None, marker_face_color=None, marker_edge_width=None):
-        super().__init__(line_style, line_width, color, alpha, marker, marker_size,
-                         marker_edge_color, marker_face_color, marker_edge_width)
+        super().__init__(line_style=line_style, line_width=line_width, color=color, alpha=alpha, marker=marker, marker_size=marker_size,
+                         marker_edge_color=marker_edge_color, marker_face_color=marker_face_color, marker_edge_width=marker_edge_width)
 
         if self.color is None:
             self.color = rc_color
@@ -111,17 +113,16 @@ class DoubleLinePlot(PlotParams):
                 self.marker_edge_color, self.marker_face_color, self.marker_edge_width]
 
     def _all_labels(self):
-        return ['ls', 'lw', 'color', 'alpha',
-                'marker', 'ms', 'mec', 'mfc', 'mew']
+        return ['ls', 'lw', 'color', 'alpha', 'marker', 'ms', 'mec', 'mfc', 'mew']
 
 
-class DoubleScatterPlot(PlotParams):
+class ScatterPlot(_PlotParams):
     """
     Class for double-scatter plot parameters.
 
     Parameters
     ----------
-    All parameters are inherited from `PlotParams`.
+    All parameters are inherited from `_PlotParams`.
     """
 
     def __init__(self, size=None, color=None, marker=None, cmap=None, alpha=None, face_color=None):
