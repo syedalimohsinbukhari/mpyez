@@ -2,10 +2,16 @@
 
 __all__ = ['plot_two_column_file', 'plot_xy', 'plot_with_dual_axes']
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+from .backend.ePlotting import DoubleLinePlot, DoubleScatterPlot, rc_color
+
+# safeguard
+double_scatter_plot = "DoubleScatterPlot"
+double_line_plot = "DoubleLinePlot"
 
 
 # TODO:
@@ -85,12 +91,13 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
                         x2_data: Optional[np.ndarray] = None, y2_data: Optional[np.ndarray] = None,
                         x1y1_label: str = 'X1 vs Y1', x1y2_label: str = 'X1 vs Y2', x2y1_label: str = 'X2 vs Y1',
                         use_twin_x: bool = False, auto_label: bool = False, fig_size: Tuple[int, int] = (12, 5),
-                        is_scatter: bool = False, color_y2: str = 'red') -> plt:
+                        is_scatter: bool = False, plot_dictionary: Union[DoubleLinePlot, DoubleScatterPlot] = None) -> plt:
     """
     Plots data with options for dual axes (x or y) or single axis.
 
     Parameters
     ----------
+    plot_dictionary
     x1_data : np.ndarray
         Data for the primary x-axis.
     y1_data : np.ndarray
@@ -113,8 +120,6 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
         Figure size for the plot. Default is (12, 5).
     is_scatter : bool, optional
         If True, creates scatter plot; otherwise, line plot. Default is False.
-    color_y2 : str, optional
-        Color for the secondary y-axis or X2 axis plot (default is 'red').
 
     Returns
     -------
@@ -134,7 +139,14 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     def _plot_or_scatter(ax, scatter):
         return ax.scatter if scatter else ax.plot
 
-    _plot_or_scatter(ax1, is_scatter)(x1_data, y1_data, label=x1y1_label)
+    if plot_dictionary.__class__.__name__ in [double_line_plot, double_scatter_plot]:
+        dict1 = {key: value[0] for key, value in plot_dictionary.get().items()}
+
+        dict2 = {key: value[1] for key, value in plot_dictionary.get().items()}
+    else:
+        dict1, dict2 = {'c': rc_color[0]}, {'c': rc_color[1]}
+
+    _plot_or_scatter(ax1, is_scatter)(x1_data, y1_data, label=x1y1_label, **dict1)
 
     ax2 = None
 
@@ -145,13 +157,13 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
 
     if use_twin_x:
         ax2 = ax1.twinx()
-        _plot_or_scatter(ax2, is_scatter)(x1_data, y2_data, label=x1y2_label, color=color_y2)
+        _plot_or_scatter(ax2, is_scatter)(x1_data, y2_data, label=x1y2_label, **dict2)
         if auto_label:
             ax2.set_ylabel('Y2')
 
     elif x2_data is not None:
         ax2 = ax1.twiny()
-        _plot_or_scatter(ax2, is_scatter)(x2_data, y1_data, label=x2y1_label, color=color_y2)
+        _plot_or_scatter(ax2, is_scatter)(x2_data, y1_data, label=x2y1_label, **dict2)
         if auto_label:
             ax2.set_xlabel('X2')
 
