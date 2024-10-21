@@ -2,10 +2,17 @@
 
 __all__ = ['plot_two_column_file', 'plot_xy', 'plot_with_dual_axes']
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+from .backend.ePlotting import LinePlot, ScatterPlot
+
+# safeguard
+line_plot = "LinePlot"
+scatter_plot = "ScatterPlot"
+plot_dictionary_type = Optional[Union[LinePlot, ScatterPlot]]
 
 
 # TODO:
@@ -15,7 +22,7 @@ import numpy as np
 
 
 def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool = False, auto_label: bool = False,
-                         fig_size: Tuple[int, int] = (12, 5), is_scatter: bool = False) -> plt:
+                         fig_size: Tuple[int, int] = (12, 5), is_scatter: bool = False, plot_dictionary: plot_dictionary_type = None) -> plt:
     """
     Reads a two-column file (x, y) and plots the data.
 
@@ -36,6 +43,9 @@ def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool
         The size of the plot figure, only used if a new plot is created (default is (12, 5)).
     is_scatter : bool, optional
         If True, creates a scatter plot. Otherwise, creates a line plot (default is False).
+    plot_dictionary: Union[LinePlot, ScatterPlot], optional
+        An object representing the plot data, either a `LinePlot` or `ScatterPlot`,  to be passed to the matplotlib plotting library.
+         If None, a default plot type will be used.
 
     Returns
     -------
@@ -49,11 +59,12 @@ def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool
 
     x_data, y_data = data.T
 
-    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter)
+    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter,
+                               plot_dictionary=plot_dictionary)
 
 
 def plot_xy(x_data: np.ndarray, y_data: np.ndarray, auto_label: bool = False, fig_size: Tuple[int, int] = (12, 5),
-            is_scatter: bool = False) -> plt:
+            is_scatter: bool = False, plot_dictionary: plot_dictionary_type = None) -> plt:
     """
     Plots x_data against y_data with customizable options.
 
@@ -72,20 +83,24 @@ def plot_xy(x_data: np.ndarray, y_data: np.ndarray, auto_label: bool = False, fi
         The size of the plot figure (default is (12, 5)).
     is_scatter : bool, optional
         If True, creates a scatter plot. Otherwise, creates a line plot (default is False).
+    plot_dictionary: Union[LinePlot, ScatterPlot], optional
+        An object representing the plot data, either a `LinePlot` or `ScatterPlot`,  to be passed to the matplotlib plotting library.
+         If None, a default plot type will be used.
 
     Returns
     -------
     plt : matplotlib.pyplot
         The matplotlib.pyplot object for the generated plot.
     """
-    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter)
+    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter,
+                               plot_dictionary=plot_dictionary)
 
 
 def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
                         x2_data: Optional[np.ndarray] = None, y2_data: Optional[np.ndarray] = None,
                         x1y1_label: str = 'X1 vs Y1', x1y2_label: str = 'X1 vs Y2', x2y1_label: str = 'X2 vs Y1',
                         use_twin_x: bool = False, auto_label: bool = False, fig_size: Tuple[int, int] = (12, 5),
-                        is_scatter: bool = False, color_y2: str = 'red') -> plt:
+                        is_scatter: bool = False, plot_dictionary: plot_dictionary_type = None) -> plt:
     """
     Plots data with options for dual axes (x or y) or single axis.
 
@@ -113,8 +128,9 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
         Figure size for the plot. Default is (12, 5).
     is_scatter : bool, optional
         If True, creates scatter plot; otherwise, line plot. Default is False.
-    color_y2 : str, optional
-        Color for the secondary y-axis or X2 axis plot (default is 'red').
+    plot_dictionary: Union[LinePlot, ScatterPlot], optional
+        An object representing the plot data, either a `LinePlot` or `ScatterPlot`,  to be passed to the matplotlib plotting library.
+         If None, a default plot type will be used.
 
     Returns
     -------
@@ -134,7 +150,20 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     def _plot_or_scatter(ax, scatter):
         return ax.scatter if scatter else ax.plot
 
-    _plot_or_scatter(ax1, is_scatter)(x1_data, y1_data, label=x1y1_label)
+    if plot_dictionary:
+        plot_items = plot_dictionary.get().items()
+    elif is_scatter:
+        plot_items = ScatterPlot().get().items()
+    else:
+        plot_items = LinePlot().get().items()
+
+    dict1 = {key: (value[0] if isinstance(value, list) else value) for key, value in plot_items}
+
+    # Check the condition once before creating dict2
+    use_secondary_values = x2_data is not None or y2_data is not None or use_twin_x
+    dict2 = {key: (value[1] if use_secondary_values else None) for key, value in plot_items}
+
+    _plot_or_scatter(ax1, is_scatter)(x1_data, y1_data, label=x1y1_label, **dict1)
 
     ax2 = None
 
@@ -145,13 +174,13 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
 
     if use_twin_x:
         ax2 = ax1.twinx()
-        _plot_or_scatter(ax2, is_scatter)(x1_data, y2_data, label=x1y2_label, color=color_y2)
+        _plot_or_scatter(ax2, is_scatter)(x1_data, y2_data, label=x1y2_label, **dict2)
         if auto_label:
             ax2.set_ylabel('Y2')
 
     elif x2_data is not None:
         ax2 = ax1.twiny()
-        _plot_or_scatter(ax2, is_scatter)(x2_data, y1_data, label=x2y1_label, color=color_y2)
+        _plot_or_scatter(ax2, is_scatter)(x2_data, y1_data, label=x2y1_label, **dict2)
         if auto_label:
             ax2.set_xlabel('X2')
 
