@@ -1,6 +1,6 @@
 """Created on Jul 23 23:41:18 2024"""
 
-__all__ = ['plot_two_column_file', 'plot_xy', 'plot_with_dual_axes']
+__all__ = ['plot_two_column_file', 'plot_xy', 'plot_with_dual_axes', 'two_subplots']
 
 from typing import Optional, Tuple, Union
 
@@ -16,10 +16,8 @@ plot_dictionary_type = Optional[Union[LinePlot, ScatterPlot]]
 
 
 # TODO:
-#   See what more plotting keywords can be added here
-#   See if the kwargs are working or not with the new `set_labels_and_title`
-#   Check if the `plt` objects returned are compatible with both axes in their respective functions.
-
+#   Can `two_subplots` work  with `plot_with_dual_axes`
+#   Have to add axes individual functionality in `plot_with_dual_axes`
 
 def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool = False, auto_label: bool = False,
                          fig_size: Tuple[int, int] = (12, 5), is_scatter: bool = False, plot_dictionary: plot_dictionary_type = None) -> plt:
@@ -197,13 +195,15 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     return [fig, (ax1, ax2)] if ax2 else [fig, ax1]
 
 
-def two_subplots(x_data, y_data, x_labels, y_labels, orientation='h', subplot_dictionary=None, plot_dictionary=None):
+def two_subplots(x_data, y_data, x_labels, y_labels, orientation='h', subplot_dictionary=None, plot_dictionary=None, is_scatter: bool = False):
     # ChangeList
     #   Can take two x arguments and two y arguments
     #   added capability for SubPlots dictionary, have to test LinePlot/ScatterPlot dictionaries
     #   X and Y data can be now passed in as lists
     #   for two_subplots, it provides horizontal or vertical orientation because there'll only be two subplots.
     #   Handles not providing a subplot dictionary
+    #   Handles not providing a plot dictionary
+    #   includes is_scatter option for scatter plotting
 
     if orientation == 'h':
         n_rows, n_cols = 1, 2
@@ -216,11 +216,23 @@ def two_subplots(x_data, y_data, x_labels, y_labels, orientation='h', subplot_di
                             **subplot_dictionary if subplot_dictionary else SubPlots().get())
     axs = axs.flatten()
 
-    axs[0].plot(x_data[0], y_data[0], **plot_dictionary)
+    if plot_dictionary:
+        plot_items = plot_dictionary.get().items()
+    elif is_scatter:
+        plot_items = ScatterPlot().get().items()
+    else:
+        plot_items = LinePlot().get().items()
+
+    dict1 = {key: (value[0] if isinstance(value, list) else value) for key, value in plot_items}
+
+    # Check the condition once before creating dict2
+    dict2 = {key: (value[1] if len(y_data) == 2 else None) for key, value in plot_items}
+
+    axs[0].plot(x_data[0], y_data[0], **dict1)
     axs[0].set_xlabel(x_labels[0])
     axs[0].set_ylabel(y_labels[0])
 
-    axs[1].plot(x_data[1], y_data[1], **plot_dictionary)
+    axs[1].plot(x_data[1], y_data[1], **dict2)
     axs[1].set_xlabel(x_labels[1])
     axs[1].set_ylabel(y_labels[1])
     plt.tight_layout()
