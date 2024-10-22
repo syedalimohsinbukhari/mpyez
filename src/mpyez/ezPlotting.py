@@ -4,10 +4,10 @@ __all__ = ['plot_two_column_file', 'plot_xy', 'plot_with_dual_axes']
 
 from typing import Optional, Tuple, Union
 
-import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import pyplot as plt
 
-from .backend.ePlotting import LinePlot, ScatterPlot
+from .backend.ePlotting import LinePlot, ScatterPlot, SubPlots
 
 # safeguard
 line_plot = "LinePlot"
@@ -195,3 +195,33 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     plt.tight_layout()
 
     return [fig, (ax1, ax2)] if ax2 else [fig, ax1]
+
+
+def two_subplots(x_data, y_data, x_labels, y_labels, orientation='h', subplot_dictionary=None, plot_dictionary=None):
+    # ChangeList
+    #   Can take two x arguments and two y arguments
+    #   added capability for SubPlots dictionary, have to test LinePlot/ScatterPlot dictionaries
+    #   X and Y data can be now passed in as lists
+    #   for two_subplots, it provides horizontal or vertical orientation because there'll only be two subplots.
+    #   Handles not providing a subplot dictionary
+
+    if orientation == 'h':
+        n_rows, n_cols = 1, 2
+    elif orientation == 'v':
+        n_rows, n_cols = 2, 1
+    else:
+        raise ValueError("The orientation must be either \'h\' or \'v\'.")
+
+    fig, axs = plt.subplots(n_rows, n_cols,
+                            **subplot_dictionary if subplot_dictionary else SubPlots().get())
+    axs = axs.flatten()
+
+    axs[0].plot(x_data[0], y_data[0], **plot_dictionary)
+    axs[0].set_xlabel(x_labels[0])
+    axs[0].set_ylabel(y_labels[0])
+
+    axs[1].plot(x_data[1], y_data[1], **plot_dictionary)
+    axs[1].set_xlabel(x_labels[1])
+    axs[1].set_ylabel(y_labels[1])
+    plt.tight_layout()
+    plt.show()

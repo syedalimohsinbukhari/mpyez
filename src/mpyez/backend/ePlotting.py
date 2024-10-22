@@ -1,6 +1,6 @@
 """Created on Oct 21 00:12:02 2024"""
 
-__all__ = ['LinePlot', 'ScatterPlot']
+__all__ = ['LinePlot', 'ScatterPlot', 'SubPlots']
 
 from matplotlib import pyplot as plt
 
@@ -45,7 +45,8 @@ class _PlotParams:
                  color=None, alpha=None,
                  marker=None, marker_size=None,
                  marker_edge_color=None, marker_face_color=None, marker_edge_width=None,
-                 size=None, cmap=None, face_color=None):
+                 size=None, cmap=None, face_color=None,
+                 share_x=None, share_y=None, subplot_fig_size=None):
 
         self.line_style = line_style
         self.line_width = line_width
@@ -61,6 +62,11 @@ class _PlotParams:
         self.size = size
         self.cmap = cmap
         self.face_color = face_color
+
+        # Additional keywords for subplots
+        self.share_x = share_x
+        self.share_y = share_y
+        self.fig_size = subplot_fig_size
 
     def get(self):
         """
@@ -136,3 +142,15 @@ class ScatterPlot(_PlotParams):
 
     def _all_labels(self):
         return ['s', 'c', 'marker', 'cmap', 'alpha', 'fc']
+
+
+class SubPlots(_PlotParams):
+
+    def __init__(self, share_x=None, share_y=None, fig_size=None):
+        super().__init__(share_x=share_x, share_y=share_y, subplot_fig_size=fig_size)
+
+    def _all_labels(self):
+        return ['sharex', 'sharey', 'figsize']
+
+    def _all_parameters(self):
+        return [self.share_x, self.share_y, self.fig_size]
