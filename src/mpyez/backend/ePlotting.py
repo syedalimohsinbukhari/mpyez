@@ -2,8 +2,9 @@
 
 __all__ = ['LinePlot', 'ScatterPlot', 'SubPlots']
 
-default1 = '#1f77b4'
-default2 = '#ff7f0e'
+from matplotlib import rcParams
+
+rc_color = rcParams['axes.prop_cycle'].by_key()['color'] * 10
 
 
 class _PlotParams:
@@ -103,12 +104,12 @@ class LinePlot(_PlotParams):
                  line_style=None, line_width=None,
                  color=None, alpha=None,
                  marker=None, marker_size=None,
-                 marker_edge_color=None, marker_face_color=None, marker_edge_width=None):
+                 marker_edge_color=None, marker_face_color=None, marker_edge_width=None, _fixed: int = 0):
         super().__init__(line_style=line_style, line_width=line_width, color=color, alpha=alpha, marker=marker, marker_size=marker_size,
                          marker_edge_color=marker_edge_color, marker_face_color=marker_face_color, marker_edge_width=marker_edge_width)
 
         if self.color is None:
-            self.color = [default1, default2]
+            self.color = rc_color[:_fixed]
 
     def _all_parameters(self):
         return [self.line_style, self.line_width,

@@ -1,6 +1,6 @@
 """Created on Jul 23 23:41:18 2024"""
 
-__all__ = ['plot_two_column_file', 'plot_xy', 'plot_with_dual_axes', 'two_subplots']
+__all__ = ['plot_two_column_file', 'plot_xy', 'plot_with_dual_axes', 'two_subplots', 'n_plotter']
 
 from typing import List, Optional, Tuple, Union
 
@@ -161,7 +161,7 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     def _plot_or_scatter(axes, scatter):
         return axes.scatter if scatter else axes.plot
 
-    plot_items = _plot_dictionary_handler(is_scatter=is_scatter, plot_dictionary=plot_dictionary)
+    plot_items = _plot_dictionary_handler(is_scatter=is_scatter, plot_dictionary=plot_dictionary, _fixed=2)
 
     dict1 = {key: (value[0] if isinstance(value, list) else value) for key, value in plot_items}
 
@@ -203,7 +203,8 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     return (ax1, ax2) if ax2 else ax1
 
 
-def _plot_dictionary_handler(is_scatter, plot_dictionary):
+def _plot_dictionary_handler(is_scatter, plot_dictionary: Union[LinePlot, ScatterPlot], _fixed: int = 0):
+    plot_dictionary._fixed = _fixed
     if plot_dictionary:
         plot_items = plot_dictionary.get().items()
     elif is_scatter:
@@ -213,12 +214,17 @@ def _plot_dictionary_handler(is_scatter, plot_dictionary):
     return plot_items
 
 
-def n_plotter(x_data, y_data, n_rows, n_cols, x_labels=None, y_labels=None, data_labels=None, auto_label: bool = False):
+def n_plotter(x_data, y_data, n_rows, n_cols, x_labels=None, y_labels=None, data_labels=None, auto_label: bool = False,
+              plot_dictionary=None, is_scatter: bool = False):
     # CHANGELIST:
     #   Can plot basic n_rows x n_cols data,where n_cols > n_rows
     #   Handles data labels, and uses `plot_xy` instead of `plot_on_dual_axes`
     f, ax = plt.subplots(n_rows, n_cols, figsize=(18, 4))
     ax = ax.flatten()
+
+    plot_items = _plot_dictionary_handler(is_scatter=is_scatter, plot_dictionary=plot_dictionary)
+
+    print(plot_items)
 
     if auto_label:
         x_labels = [f'X{i + 1}' for i in range(n_cols)]
