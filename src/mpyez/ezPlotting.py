@@ -22,6 +22,7 @@ axis_return = Union[List[plt.axis], plt.axis]
 #   Have to add axes individual functionality in `plot_with_dual_axes`
 #   See if two plots can work with a single specifier of kwargs in plots
 #   Get rid of fig_size default values in the functions
+#   Data labels for dependant functions are not handled properly [URGENT]
 
 def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool = False, auto_label: bool = False,
                          fig_size: Tuple[int, int] = None, is_scatter: bool = False, plot_dictionary: plot_dictionary_type = None,
@@ -66,7 +67,7 @@ def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool
                                plot_dictionary=plot_dictionary, axis=axis)
 
 
-def plot_xy(x_data: np.ndarray, y_data: np.ndarray, auto_label: bool = False, fig_size: Tuple[int, int] = None,
+def plot_xy(x_data: np.ndarray, y_data: np.ndarray, auto_label: bool = False, data_label='X1 vs Y1', fig_size: Tuple[int, int] = None,
             is_scatter: bool = False, plot_dictionary: plot_dictionary_type = None,
             axis: Optional[plt.axis] = None) -> axis_return:
     """
@@ -96,7 +97,7 @@ def plot_xy(x_data: np.ndarray, y_data: np.ndarray, auto_label: bool = False, fi
     plt : matplotlib.pyplot
         The matplotlib.pyplot object for the generated plot.
     """
-    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter,
+    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, x1y1_label=data_label, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter,
                                plot_dictionary=plot_dictionary, axis=axis)
 
 
@@ -210,6 +211,27 @@ def _plot_dictionary_handler(is_scatter, plot_dictionary):
     else:
         plot_items = LinePlot().get().items()
     return plot_items
+
+
+def n_plotter(x_data, y_data, n_rows, n_cols, x_labels=None, y_labels=None, data_labels=None, auto_label: bool = False):
+    # CHANGELIST:
+    #   Can plot basic n_rows x n_cols data,where n_cols > n_rows
+    #   Handles data labels, and uses `plot_xy` instead of `plot_on_dual_axes`
+    f, ax = plt.subplots(n_rows, n_cols, figsize=(18, 4))
+    ax = ax.flatten()
+
+    if auto_label:
+        x_labels = [f'X{i + 1}' for i in range(n_cols)]
+        y_labels = [f'Y{i + 1}' for i in range(n_cols)]
+
+    for i in range(n_cols):
+        label = f'{x_labels[i]} vs {y_labels[i]}' if data_labels is None else data_labels[i]
+        plot_xy(x_data[i], y_data[i], data_label=label, axis=ax[i], auto_label=False)
+
+    [ax[i].set_xlabel(j) for i, j in zip(range(n_cols), x_labels)]
+    [ax[i].set_ylabel(j) for i, j in zip(range(n_cols), y_labels)]
+    plt.tight_layout()
+    plt.show()
 
 
 def two_subplots(x_data, y_data, x_labels, y_labels, orientation='h', subplot_dictionary=None, plot_dictionary=None, is_scatter: bool = False):
