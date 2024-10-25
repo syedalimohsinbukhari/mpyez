@@ -218,6 +218,7 @@ def n_plotter(x_data, y_data, n_rows, n_cols, x_labels=None, y_labels=None, data
     #   Doesn't show other y axes if share_y = True
     #   Works with axes passed as well,
     #   Removed the axes variable
+    #   Handles multi-row and multi-column subplots as well
     sp_dict = subplot_dictionary.get() if subplot_dictionary else SubPlots().get()
 
     fig, axs = plt.subplots(n_rows, n_cols, **sp_dict)
@@ -225,18 +226,21 @@ def n_plotter(x_data, y_data, n_rows, n_cols, x_labels=None, y_labels=None, data
 
     plot_items = _plot_dictionary_handler(plot_dictionary=plot_dictionary)
 
-    main_dict = [{key: value[c] for key, value in plot_items} for c in range(n_cols)]
+    main_dict = [{key: value[c] for key, value in plot_items} for c in range(n_cols * n_rows)]
 
     if auto_label:
         x_labels = [f'X{i + 1}' for i in range(n_cols)]
         y_labels = [f'Y{i + 1}' for i in range(n_cols)]
 
-    partial_condition = sp_dict.get('sharey')
+    shared_y = sp_dict.get('sharey')
+    shared_x1 = sp_dict.get('sharex')
+    shared_x2 = len(axs) - int(len(axs) / n_rows if n_rows > n_cols else n_cols)
     for index, ax, j, k in zip(range(n_cols * n_rows), axs, x_labels, y_labels):
         label = f'{x_labels[index]} vs {y_labels[index]}' if data_labels is None else data_labels[index]
         _plot_or_scatter(axes=ax, scatter=is_scatter)(x_data[index], y_data[index], label=label, **main_dict[index])
-        ax.set_xlabel(j)
-        if not (partial_condition and index != 0):
+        if not (shared_x1 and index < shared_x2):
+            ax.set_xlabel(j)
+        if not (shared_y and index % n_cols != 0):
             ax.set_ylabel(k)
         ax.legend(loc='best')
 
