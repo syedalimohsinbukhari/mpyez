@@ -109,7 +109,7 @@ class LinePlot(_PlotParams):
                          marker_edge_color=marker_edge_color, marker_face_color=marker_face_color, marker_edge_width=marker_edge_width)
 
         if self.color is None:
-            self.color = rc_color[:_fixed]
+            self.color = rc_color
 
     def _all_parameters(self):
         return [self.line_style, self.line_width,
@@ -134,7 +134,7 @@ class ScatterPlot(_PlotParams):
         super().__init__(color=color, alpha=alpha, marker=marker, size=size, cmap=cmap, face_color=face_color)
 
         if self.color is None:
-            self.color = [default1, default2]
+            self.color = rc_color
 
     def _all_parameters(self):
         return [self.size, self.color, self.marker, self.cmap, self.alpha, self.face_color]

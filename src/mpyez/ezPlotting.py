@@ -24,6 +24,10 @@ axis_return = Union[List[plt.axis], plt.axis]
 #   Get rid of fig_size default values in the functions
 #   Data labels for dependant functions are not handled properly [URGENT]
 
+def _plot_or_scatter(axes, scatter):
+    return axes.scatter if scatter else axes.plot
+
+
 def plot_two_column_file(file_name: str, delimiter: str = ',', skip_header: bool = False, auto_label: bool = False,
                          fig_size: Tuple[int, int] = None, is_scatter: bool = False, plot_dictionary: plot_dictionary_type = None,
                          axis: Optional[plt.axis] = None) -> axis_return:
@@ -158,10 +162,7 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     else:
         _, ax1 = plt.subplots(figsize=fig_size if fig_size else rcParams["figure.figsize"])
 
-    def _plot_or_scatter(axes, scatter):
-        return axes.scatter if scatter else axes.plot
-
-    plot_items = _plot_dictionary_handler(is_scatter=is_scatter, plot_dictionary=plot_dictionary, _fixed=2)
+    plot_items = _plot_dictionary_handler(plot_dictionary=plot_dictionary)
 
     dict1 = {key: (value[0] if isinstance(value, list) else value) for key, value in plot_items}
 
@@ -203,44 +204,50 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     return (ax1, ax2) if ax2 else ax1
 
 
-def _plot_dictionary_handler(is_scatter, plot_dictionary: Union[LinePlot, ScatterPlot], _fixed: int = 0):
-    plot_dictionary._fixed = _fixed
-    if plot_dictionary:
-        plot_items = plot_dictionary.get().items()
-    elif is_scatter:
-        plot_items = ScatterPlot().get().items()
-    else:
-        plot_items = LinePlot().get().items()
-    return plot_items
+def _plot_dictionary_handler(plot_dictionary: Union[LinePlot, ScatterPlot]):
+    return plot_dictionary.get().items() if plot_dictionary else LinePlot().get().items()
 
 
 def n_plotter(x_data, y_data, n_rows, n_cols, x_labels=None, y_labels=None, data_labels=None, auto_label: bool = False,
-              plot_dictionary=None, is_scatter: bool = False):
+              subplot_dictionary=None, plot_dictionary=None, is_scatter: bool = False):
     # CHANGELIST:
     #   Can plot basic n_rows x n_cols data,where n_cols > n_rows
     #   Handles data labels, and uses `plot_xy` instead of `plot_on_dual_axes`
-    f, ax = plt.subplots(n_rows, n_cols, figsize=(18, 4))
-    ax = ax.flatten()
+    #   Handles all dictionaries good -> for n_rows = 1
+    #   logic of x_label, y_label and legend is simplified
+    #   Doesn't show other y axes if share_y = True
+    #   Works with axes passed as well,
+    #   Removed the axes variable
+    sp_dict = subplot_dictionary.get() if subplot_dictionary else SubPlots().get()
 
-    plot_items = _plot_dictionary_handler(is_scatter=is_scatter, plot_dictionary=plot_dictionary)
+    fig, axs = plt.subplots(n_rows, n_cols, **sp_dict)
+    axs = axs.flatten()
 
-    print(plot_items)
+    plot_items = _plot_dictionary_handler(plot_dictionary=plot_dictionary)
+
+    main_dict = [{key: value[c] for key, value in plot_items} for c in range(n_cols)]
 
     if auto_label:
         x_labels = [f'X{i + 1}' for i in range(n_cols)]
         y_labels = [f'Y{i + 1}' for i in range(n_cols)]
 
-    for i in range(n_cols):
-        label = f'{x_labels[i]} vs {y_labels[i]}' if data_labels is None else data_labels[i]
-        plot_xy(x_data[i], y_data[i], data_label=label, axis=ax[i], auto_label=False)
+    partial_condition = sp_dict.get('sharey')
+    for index, ax, j, k in zip(range(n_cols * n_rows), axs, x_labels, y_labels):
+        label = f'{x_labels[index]} vs {y_labels[index]}' if data_labels is None else data_labels[index]
+        _plot_or_scatter(axes=ax, scatter=is_scatter)(x_data[index], y_data[index], label=label, **main_dict[index])
+        ax.set_xlabel(j)
+        if not (partial_condition and index != 0):
+            ax.set_ylabel(k)
+        ax.legend(loc='best')
 
-    [ax[i].set_xlabel(j) for i, j in zip(range(n_cols), x_labels)]
-    [ax[i].set_ylabel(j) for i, j in zip(range(n_cols), y_labels)]
     plt.tight_layout()
     plt.show()
 
+    return fig, axs
 
-def two_subplots(x_data, y_data, x_labels, y_labels, orientation='h', subplot_dictionary=None, plot_dictionary=None, is_scatter: bool = False):
+
+def two_subplots(x_data, y_data, x_labels, y_labels, data_labels, orientation='h', subplot_dictionary=None, plot_dictionary=None,
+                 auto_label: bool = False, is_scatter: bool = False):
     # CHANGELIST:
     #   Can take two x arguments and two y arguments
     #   added capability for SubPlots dictionary, have to test LinePlot/ScatterPlot dictionaries
@@ -250,7 +257,9 @@ def two_subplots(x_data, y_data, x_labels, y_labels, orientation='h', subplot_di
     #   Handles not providing a plot dictionary
     #   includes is_scatter option for scatter plotting
     #   can now handle plot dictionary with various parameters, the first parameter is used in both dictionaries if second parameter is not provided.
-
+    #   returns axes object
+    #   adapts to `n_plotter` for plotting
+    #   Removed the axes variable
     if orientation == 'h':
         n_rows, n_cols = 1, 2
     elif orientation == 'v':
@@ -258,21 +267,5 @@ def two_subplots(x_data, y_data, x_labels, y_labels, orientation='h', subplot_di
     else:
         raise ValueError("The orientation must be either \'h\' or \'v\'.")
 
-    fig, axs = plt.subplots(n_rows, n_cols,
-                            **subplot_dictionary if subplot_dictionary else SubPlots().get())
-    axs = axs.flatten()
-
-    plot_items = _plot_dictionary_handler(is_scatter=is_scatter, plot_dictionary=plot_dictionary)
-
-    dict1 = {key: value[0] if isinstance(value, list) else value for key, value in plot_items}
-    dict2 = {key: value[1] if isinstance(value, list) else value for key, value in plot_items}
-
-    axs[0].plot(x_data[0], y_data[0], **dict1)
-    axs[0].set_xlabel(x_labels[0])
-    axs[0].set_ylabel(y_labels[0])
-
-    axs[1].plot(x_data[1], y_data[1], **dict2)
-    axs[1].set_xlabel(x_labels[1])
-    axs[1].set_ylabel(y_labels[1])
-    plt.tight_layout()
-    plt.show()
+    return n_plotter(x_data=x_data, y_data=y_data, n_rows=n_rows, n_cols=n_cols, x_labels=x_labels, y_labels=y_labels, data_labels=data_labels,
+                     auto_label=auto_label, subplot_dictionary=subplot_dictionary, plot_dictionary=plot_dictionary, is_scatter=is_scatter)
