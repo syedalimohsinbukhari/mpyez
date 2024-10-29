@@ -19,13 +19,6 @@ plot_dictionary_type = Optional[Union[LinePlot, ScatterPlot]]
 axis_return = Union[List[plt.axis], plt.axis]
 
 
-# TODO:
-#   Can `two_subplots` work  with `plot_with_dual_axes`
-#   Have to add axes individual functionality in `plot_with_dual_axes`
-#   See if two plots can work with a single specifier of kwargs in plots
-#   Get rid of fig_size default values in the functions
-#   Data labels for dependant functions are not handled properly [URGENT]
-
 def _plot_or_scatter(axes, scatter):
     return axes.scatter if scatter else axes.plot
 
@@ -76,7 +69,7 @@ def plot_two_column_file(file_name: str,
 
     x_data, y_data = data.T
 
-    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter,
+    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, is_scatter=is_scatter, fig_size=fig_size,
                                plot_dictionary=plot_dictionary, axis=axis)
 
 
@@ -118,7 +111,7 @@ def plot_xy(x_data: np.ndarray, y_data: np.ndarray,
     list:
         Either a single or double axis list.
     """
-    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, x1y1_label=data_label, auto_label=auto_label, fig_size=fig_size, is_scatter=is_scatter,
+    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, x1y1_label=data_label, auto_label=auto_label, is_scatter=is_scatter, fig_size=fig_size,
                                plot_dictionary=plot_dictionary, axis=axis)
 
 
@@ -189,8 +182,6 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     plot_items = _plot_dictionary_handler(plot_dictionary=plot_dictionary)
 
     dict1 = {key: (value[0] if isinstance(value, list) else value) for key, value in plot_items}
-
-    # Check the condition once before creating dict2
     use_secondary_values = x2_data is not None or y2_data is not None or use_twin_x
     dict2 = {key: (value[1] if use_secondary_values else None) for key, value in plot_items}
 
@@ -231,6 +222,68 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
 def _plot_dictionary_handler(plot_dictionary: Union[LinePlot, ScatterPlot]):
     """Handles plot dictionary configuration by returning the items from the specified plot dictionary or a default."""
     return plot_dictionary.get().items() if plot_dictionary else LinePlot().get().items()
+
+
+def two_subplots(x_data: List[np.ndarray], y_data: List[np.ndarray],
+                 x_labels: List[str], y_labels: List[str], data_labels: List[str],
+                 orientation: str = 'h',
+                 auto_label: bool = False,
+                 is_scatter: bool = False,
+                 subplot_dictionary: Optional[SubPlots] = None,
+                 plot_dictionary: Optional[Union[LinePlot, ScatterPlot]] = None) -> None:
+    """
+    Creates two subplots arranged horizontally or vertically, with optional customization.
+
+    This function internally calls `n_plotter` to handle the plotting of each subplot.
+    `n_plotter` arranges the subplots and applies relevant plot and subplot dictionaries.
+
+    Parameters
+    ----------
+    x_data : list of np.ndarray
+        List containing x-axis data arrays for each subplot.
+    y_data : list of np.ndarray
+        List containing y-axis data arrays for each subplot.
+    x_labels : list of str
+        List of labels for the x-axes in each subplot.
+    y_labels : list of str
+        List of labels for the y-axes in each subplot.
+    data_labels : list of str
+        List of labels for the data series in each subplot.
+    orientation : str, optional, default='h'
+        Orientation of the subplots, either 'h' for horizontal or 'v' for vertical.
+    auto_label : bool, default False
+        Automatically assigns labels to subplots if `True`.
+    is_scatter : bool, default False
+        If `True`, plots data as scatter plots; otherwise, plots as line plots.
+    subplot_dictionary : dict, optional
+        Dictionary of parameters for subplot configuration.
+    plot_dictionary : LinePlot or ScatterPlot, optional
+        Object containing plot styling parameters. Defaults to `LinePlot`.
+    """
+    # CHANGELIST:
+    #   Can take two x arguments and two y arguments
+    #   added capability for SubPlots dictionary, have to test LinePlot/ScatterPlot dictionaries
+    #   X and Y data can be now passed in as lists
+    #   for two_subplots, it provides horizontal or vertical orientation because there'll only be two subplots.
+    #   Handles not providing a subplot dictionary
+    #   Handles not providing a plot dictionary
+    #   includes is_scatter option for scatter plotting
+    #   can now handle plot dictionary with various parameters, the first parameter is used in both dictionaries if second parameter is not provided.
+    #   returns axes object
+    #   adapts to `n_plotter` for plotting
+    #   Removed the axes variable
+    if orientation == 'h':
+        n_rows, n_cols = 1, 2
+    elif orientation == 'v':
+        n_rows, n_cols = 2, 1
+    else:
+        raise OrientationError("The orientation must be either \'h\' or \'v\'.")
+
+    return n_plotter(x_data=x_data, y_data=y_data,
+                     n_rows=n_rows, n_cols=n_cols,
+                     x_labels=x_labels, y_labels=y_labels, data_labels=data_labels,
+                     auto_label=auto_label, is_scatter=is_scatter,
+                     subplot_dictionary=subplot_dictionary, plot_dictionary=plot_dictionary)
 
 
 def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
@@ -329,62 +382,3 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
     plt.tight_layout()
 
     return fig, axs
-
-
-def two_subplots(x_data: List[np.ndarray], y_data: List[np.ndarray],
-                 x_labels: List[str], y_labels: List[str], data_labels: List[str],
-                 orientation: str = 'h',
-                 auto_label: bool = False,
-                 is_scatter: bool = False,
-                 subplot_dictionary: Optional[SubPlots] = None,
-                 plot_dictionary: Optional[Union[LinePlot, ScatterPlot]] = None) -> None:
-    """
-    Creates two subplots arranged horizontally or vertically, with optional customization.
-
-    This function internally calls `n_plotter` to handle the plotting of each subplot.
-    `n_plotter` arranges the subplots and applies relevant plot and subplot dictionaries.
-
-    Parameters
-    ----------
-    x_data : list of np.ndarray
-        List containing x-axis data arrays for each subplot.
-    y_data : list of np.ndarray
-        List containing y-axis data arrays for each subplot.
-    x_labels : list of str
-        List of labels for the x-axes in each subplot.
-    y_labels : list of str
-        List of labels for the y-axes in each subplot.
-    data_labels : list of str
-        List of labels for the data series in each subplot.
-    orientation : str, optional, default='h'
-        Orientation of the subplots, either 'h' for horizontal or 'v' for vertical.
-    auto_label : bool, default False
-        Automatically assigns labels to subplots if `True`.
-    is_scatter : bool, default False
-        If `True`, plots data as scatter plots; otherwise, plots as line plots.
-    subplot_dictionary : dict, optional
-        Dictionary of parameters for subplot configuration.
-    plot_dictionary : LinePlot or ScatterPlot, optional
-        Object containing plot styling parameters. Defaults to `LinePlot`.
-    """
-    # CHANGELIST:
-    #   Can take two x arguments and two y arguments
-    #   added capability for SubPlots dictionary, have to test LinePlot/ScatterPlot dictionaries
-    #   X and Y data can be now passed in as lists
-    #   for two_subplots, it provides horizontal or vertical orientation because there'll only be two subplots.
-    #   Handles not providing a subplot dictionary
-    #   Handles not providing a plot dictionary
-    #   includes is_scatter option for scatter plotting
-    #   can now handle plot dictionary with various parameters, the first parameter is used in both dictionaries if second parameter is not provided.
-    #   returns axes object
-    #   adapts to `n_plotter` for plotting
-    #   Removed the axes variable
-    if orientation == 'h':
-        n_rows, n_cols = 1, 2
-    elif orientation == 'v':
-        n_rows, n_cols = 2, 1
-    else:
-        raise OrientationError("The orientation must be either \'h\' or \'v\'.")
-
-    return n_plotter(x_data=x_data, y_data=y_data, n_rows=n_rows, n_cols=n_cols, x_labels=x_labels, y_labels=y_labels, data_labels=data_labels,
-                     auto_label=auto_label, subplot_dictionary=subplot_dictionary, plot_dictionary=plot_dictionary, is_scatter=is_scatter)
