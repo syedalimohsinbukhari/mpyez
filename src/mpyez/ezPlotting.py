@@ -275,6 +275,7 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
     #   Works with axes passed as well,
     #   Removed the axes variable
     #   Handles multi-row and multi-column subplots as well
+    #   Slight modification in multi-row and multi-column subplot decorations
     sp_dict = subplot_dictionary.get() if subplot_dictionary else SubPlots().get()
 
     fig, axs = plt.subplots(n_rows, n_cols, **sp_dict)
@@ -285,8 +286,8 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
     main_dict = [{key: value[c] for key, value in plot_items} for c in range(n_cols * n_rows)]
 
     if auto_label:
-        x_labels = [f'X{i + 1}' for i in range(n_cols)]
-        y_labels = [f'Y{i + 1}' for i in range(n_cols)]
+        x_labels = [f'X{i + 1}' for i in range(n_cols * n_rows)]
+        y_labels = [f'Y{i + 1}' for i in range(n_cols * n_rows)]
 
     shared_y = sp_dict.get('sharey')
     shared_x1 = sp_dict.get('sharex')
@@ -294,7 +295,10 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
     for index, ax, j, k in zip(range(n_cols * n_rows), axs, x_labels, y_labels):
         label = f'{x_labels[index]} vs {y_labels[index]}' if data_labels is None else data_labels[index]
         _plot_or_scatter(axes=ax, scatter=is_scatter)(x_data[index], y_data[index], label=label, **main_dict[index])
-        if not (shared_x1 and index < shared_x2):
+        if shared_x1:
+            if not index < shared_x2:
+                ax.set_xlabel(j)
+        else:
             ax.set_xlabel(j)
         if not (shared_y and index % n_cols != 0):
             ax.set_ylabel(k)
