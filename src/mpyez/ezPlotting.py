@@ -2,6 +2,7 @@
 
 __all__ = ['plot_two_column_file', 'plot_xy', 'plot_with_dual_axes', 'two_subplots', 'n_plotter']
 
+import warnings
 from typing import List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
@@ -9,6 +10,7 @@ import numpy as np
 from matplotlib import rcParams
 
 from .backend.ePlotting import LinePlot, ScatterPlot, SubPlots
+from .backend.uPlotting import NoXYLabels, OrientationError
 
 # safeguard
 line_plot = "LinePlot"
@@ -285,9 +287,29 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
 
     main_dict = [{key: value[c] for key, value in plot_items} for c in range(n_cols * n_rows)]
 
+    if not auto_label and (x_labels is None or y_labels is None):
+        raise NoXYLabels("Both x_labels and y_labels are required without the auto_label parameter.")
+    elif auto_label and (x_labels is None or y_labels is None):
+        if x_labels is None and y_labels is None:
+            pass
+        else:
+            if x_labels is None:
+                warnings.warn("y_labels given but x_labels is missing, applying auto-labeling...", UserWarning)
+            if y_labels is None:
+                warnings.warn("x_labels given but y_labels is missing, applying auto-labeling...", UserWarning)
+
     if auto_label:
-        x_labels = [f'X{i + 1}' for i in range(n_cols * n_rows)]
-        y_labels = [f'Y{i + 1}' for i in range(n_cols * n_rows)]
+        if x_labels and y_labels:
+            start = "auto_label selected with x_labels and y_labels provided"
+            if len(x_labels) != n_rows * n_cols or len(y_labels) != n_rows * n_cols:
+                warnings.warn(f"{start}, mismatch found, using auto-generated labels...", UserWarning)
+                x_labels = [fr'X$_{i + 1}$' for i in range(n_cols * n_rows)]
+                y_labels = [fr'Y$_{i + 1}$' for i in range(n_cols * n_rows)]
+            else:
+                print(f"{start}, using user-provided labels...")
+        else:
+            x_labels = [fr'X$_{i + 1}$' for i in range(n_cols * n_rows)]
+            y_labels = [fr'Y$_{i + 1}$' for i in range(n_cols * n_rows)]
 
     shared_y = sp_dict.get('sharey')
     shared_x1 = sp_dict.get('sharex')
@@ -305,7 +327,6 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
         ax.legend(loc='best')
 
     plt.tight_layout()
-    plt.show()
 
     return fig, axs
 
@@ -363,7 +384,7 @@ def two_subplots(x_data: List[np.ndarray], y_data: List[np.ndarray],
     elif orientation == 'v':
         n_rows, n_cols = 2, 1
     else:
-        raise ValueError("The orientation must be either \'h\' or \'v\'.")
+        raise OrientationError("The orientation must be either \'h\' or \'v\'.")
 
     return n_plotter(x_data=x_data, y_data=y_data, n_rows=n_rows, n_cols=n_cols, x_labels=x_labels, y_labels=y_labels, data_labels=data_labels,
                      auto_label=auto_label, subplot_dictionary=subplot_dictionary, plot_dictionary=plot_dictionary, is_scatter=is_scatter)
