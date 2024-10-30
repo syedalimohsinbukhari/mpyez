@@ -1,11 +1,11 @@
 """Created on Oct 29 09:33:06 2024"""
 
-__all__ = ['LinePlot', 'ScatterPlot', 'SubPlots', 'label_handler']
+__all__ = ['LinePlot', 'ScatterPlot', 'SubPlots', 'label_handler', 'plot_or_scatter', 'plot_dictionary_handler']
 
 import warnings
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
-from matplotlib import rcParams
+from matplotlib import pyplot as plt, rcParams
 
 from .ePlotting import NoXYLabels
 
@@ -222,3 +222,41 @@ def label_handler(x_labels: Optional[List[str]], y_labels: Optional[List[str]],
             y_labels = [fr'Y$_{i + 1}$' for i in range(n_cols * n_rows)]
 
     return x_labels, y_labels
+
+
+def plot_or_scatter(axes: plt.axis, scatter: bool):
+    """
+    Returns the plot or scatter method based on the specified plot type.
+
+    Parameters
+    ----------
+    axes : plt.axis
+        The matplotlib axis on which to apply the plot or scatter method.
+    scatter : bool
+        If True, returns the scatter method; otherwise, returns the plot method.
+
+    Returns
+    -------
+    function
+        The matplotlib plotting method (`axes.scatter` if scatter is True, otherwise `axes.plot`).
+    """
+    return axes.scatter if scatter else axes.plot
+
+
+def plot_dictionary_handler(plot_dictionary: Union[LinePlot, ScatterPlot]):
+    """
+    Handles plot dictionary configuration, retrieving items from the specified plot dictionary.
+
+    If no dictionary is provided, returns items from a default LinePlot instance.
+
+    Parameters
+    ----------
+    plot_dictionary : Union[LinePlot, ScatterPlot]
+        The plot dictionary to retrieve items from. If None, defaults to a LinePlot instance.
+
+    Returns
+    -------
+    Iterable
+        An iterable of items (key-value pairs) from the specified or default plot dictionary.
+    """
+    return plot_dictionary.get().items() if plot_dictionary else LinePlot().get().items()

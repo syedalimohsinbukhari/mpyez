@@ -9,17 +9,13 @@ import numpy as np
 from matplotlib import rcParams
 
 from .backend.ePlotting import OrientationError
-from .backend.uPlotting import label_handler, LinePlot, ScatterPlot, SubPlots
+from .backend.uPlotting import label_handler, LinePlot, plot_dictionary_handler, plot_or_scatter, ScatterPlot, SubPlots
 
 # safeguard
 line_plot = "LinePlot"
 scatter_plot = "ScatterPlot"
 plot_dictionary_type = Optional[Union[LinePlot, ScatterPlot]]
 axis_return = Union[List[plt.axis], plt.axis]
-
-
-def _plot_or_scatter(axes, scatter):
-    return axes.scatter if scatter else axes.plot
 
 
 def plot_two_column_file(file_name: str,
@@ -178,13 +174,13 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     else:
         _, ax1 = plt.subplots(figsize=fig_size if fig_size else rcParams["figure.figsize"])
 
-    plot_items = _plot_dictionary_handler(plot_dictionary=plot_dictionary)
+    plot_items = plot_dictionary_handler(plot_dictionary=plot_dictionary)
 
     dict1 = {key: (value[0] if isinstance(value, list) else value) for key, value in plot_items}
     use_secondary_values = x2_data is not None or y2_data is not None or use_twin_x
     dict2 = {key: (value[1] if use_secondary_values else None) for key, value in plot_items}
 
-    _plot_or_scatter(axes=ax1, scatter=is_scatter)(x1_data, y1_data, label=x1y1_label, **dict1)
+    plot_or_scatter(axes=ax1, scatter=is_scatter)(x1_data, y1_data, label=x1y1_label, **dict1)
 
     ax2 = None
 
@@ -195,13 +191,13 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
 
     if use_twin_x:
         ax2 = ax1.twinx()
-        _plot_or_scatter(axes=ax2, scatter=is_scatter)(x1_data, y2_data, label=x1y2_label, **dict2)
+        plot_or_scatter(axes=ax2, scatter=is_scatter)(x1_data, y2_data, label=x1y2_label, **dict2)
         if auto_label:
             ax2.set_ylabel('Y2')
 
     elif x2_data is not None:
         ax2 = ax1.twiny()
-        _plot_or_scatter(axes=ax2, scatter=is_scatter)(x2_data, y1_data, label=x2y1_label, **dict2)
+        plot_or_scatter(axes=ax2, scatter=is_scatter)(x2_data, y1_data, label=x2y1_label, **dict2)
         if auto_label:
             ax2.set_xlabel('X2')
 
@@ -216,11 +212,6 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     plt.tight_layout()
 
     return (ax1, ax2) if ax2 else ax1
-
-
-def _plot_dictionary_handler(plot_dictionary: Union[LinePlot, ScatterPlot]):
-    """Handles plot dictionary configuration by returning the items from the specified plot dictionary or a default."""
-    return plot_dictionary.get().items() if plot_dictionary else LinePlot().get().items()
 
 
 def two_subplots(x_data: List[np.ndarray], y_data: List[np.ndarray],
@@ -335,7 +326,7 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
     fig, axs = plt.subplots(n_rows, n_cols, **sp_dict)
     axs = axs.flatten()
 
-    plot_items = _plot_dictionary_handler(plot_dictionary=plot_dictionary)
+    plot_items = plot_dictionary_handler(plot_dictionary=plot_dictionary)
 
     main_dict = [{key: value[c] for key, value in plot_items} for c in range(n_cols * n_rows)]
 
@@ -346,7 +337,7 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
     shared_x2 = len(axs) - int(len(axs) / n_rows if n_rows > n_cols else n_cols)
     for index, ax, j, k in zip(range(n_cols * n_rows), axs, x_labels, y_labels):
         label = f'{x_labels[index]} vs {y_labels[index]}' if data_labels is None else data_labels[index]
-        _plot_or_scatter(axes=ax, scatter=is_scatter)(x_data[index], y_data[index], label=label, **main_dict[index])
+        plot_or_scatter(axes=ax, scatter=is_scatter)(x_data[index], y_data[index], label=label, **main_dict[index])
         if shared_x1:
             if not index < shared_x2:
                 ax.set_xlabel(j)
