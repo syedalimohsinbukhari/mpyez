@@ -291,17 +291,18 @@ def two_subplots(x_data: List[np.ndarray], y_data: List[np.ndarray],
         Object containing plot styling parameters. Defaults to `LinePlot`.
     """
     # CHANGELIST:
-    #   Can take two x arguments and two y arguments
-    #   added capability for SubPlots dictionary, have to test LinePlot/ScatterPlot dictionaries
-    #   X and Y data can be now passed in as lists
-    #   for two_subplots, it provides horizontal or vertical orientation because there'll only be two subplots.
-    #   Handles not providing a subplot dictionary
-    #   Handles not providing a plot dictionary
-    #   includes is_scatter option for scatter plotting
-    #   can now handle plot dictionary with various parameters, the first parameter is used in both dictionaries if second parameter is not provided.
-    #   returns axes object
-    #   adapts to `n_plotter` for plotting
-    #   Removed the axes variable
+    #   - Supports passing two x and two y arguments for enhanced flexibility.
+    #   - Added support for subplot dictionaries; testing needed for LinePlot/ScatterPlot cases.
+    #   - Allows X and Y data to be passed as lists for easier data handling.
+    #   - For `two_subplots`, enables horizontal or vertical orientation (since there are only two subplots).
+    #   - Falls back to default behavior if no subplot dictionary is provided.
+    #   - Defaults to standard plot settings if no plot dictionary is provided.
+    #   - Includes an `is_scatter` option for toggleable scatter plot functionality.
+    #   - Now supports plot dictionaries with multiple parameters; if the second parameter is missing, the first is applied to both subplots.
+    #   - Returns the axes object for better integration with other plotting functions.
+    #   - Adapts to `n_plotter` for enhanced plot flexibility.
+    #   - Removed the redundant `axes` variable for a cleaner implementation.
+    
     if orientation == 'h':
         n_rows, n_cols = 1, 2
     elif orientation == 'v':
@@ -353,15 +354,16 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
         Object containing plot styling parameters. Defaults to `LinePlot`.
     """
     # CHANGELIST:
-    #   Can plot basic n_rows x n_cols data,where n_cols > n_rows
-    #   Handles data labels, and uses `plot_xy` instead of `plot_on_dual_axes`
-    #   Handles all dictionaries good -> for n_rows = 1
-    #   logic of x_label, y_label and legend is simplified
-    #   Doesn't show other y axes if share_y = True
-    #   Works with axes passed as well,
-    #   Removed the axes variable
-    #   Handles multi-row and multi-column subplots as well
-    #   Slight modification in multi-row and multi-column subplot decorations
+    #   - Simplified handling of data for subplots with n_rows x n_cols layout (n_cols > n_rows).
+    #   - Replaced `plot_on_dual_axes` with `plot_xy` for better flexibility in handling data.
+    #   - Simplified logic for labels and legends, improving clarity and usability.
+    #   - Improved dictionary handling for single-row subplots.
+    #   - Removed the use of axes variable; now directly handles axes passed as arguments.
+    #   - Optimized behavior for multi-row and multi-column subplots, with better layout management.
+    #   - Improved subplot decoration for multi-row and multi-column cases (x/y labels, ticks, etc.).
+    #   - If `share_y = True`, other y-axes are no longer shown to avoid clutter.
+    #   - Removed `plot_on_dual_axes` or `plot_xy` dependency, instead uses simple plot/scatter functionality.
+    
     sp_dict = subplot_dictionary.get() if subplot_dictionary else uPl.SubPlots().get()
     
     fig, axs = plt.subplots(n_rows, n_cols, **sp_dict)
