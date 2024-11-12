@@ -1,6 +1,6 @@
 """Created on Jul 23 23:41:18 2024"""
 
-__all__ = ['plot_two_column_file', 'plot_xy', 'plot_with_dual_axes', 'two_subplots', 'n_plotter']
+__all__ = ['plot_two_column_file', 'plot_xy', 'plot_xyy', 'plot_with_dual_axes', 'two_subplots', 'n_plotter']
 
 from typing import List, Optional, Tuple, Union
 
@@ -9,7 +9,8 @@ import numpy as np
 from matplotlib import rcParams
 
 from .backend.ePlotting import OrientationError
-from .backend.uPlotting import label_handler, LinePlot, plot_dictionary_handler, plot_or_scatter, ScatterPlot, SubPlots
+from .backend.uPlotting import (label_handler, LinePlot, plot_dictionary_handler, plot_or_scatter, ScatterPlot,
+                                split_dictionary, SubPlots)
 
 # safeguard
 line_plot = "LinePlot"
@@ -58,20 +59,61 @@ def plot_two_column_file(file_name: str,
         Either a single or double axis list.
     """
     data = np.genfromtxt(file_name, delimiter=delimiter, skip_header=skip_header)
-
+    
     if data.shape[1] != 2:
         raise ValueError("The file must contain exactly two columns of data.")
-
+    
     x_data, y_data = data.T
+    
+    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, is_scatter=is_scatter,
+                               fig_size=fig_size, plot_dictionary=plot_dictionary, axis=axis)
 
-    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, auto_label=auto_label, is_scatter=is_scatter, fig_size=fig_size,
-                               plot_dictionary=plot_dictionary, axis=axis)
+
+def plot_xyy(x_data: np.ndarray, y1_data: np.ndarray, y2_data: np.ndarray,
+             data_labels: Optional[List[str]] = None, auto_label: bool = False,
+             is_scatter: bool = False, fig_size: Optional[Tuple[int, int]] = None,
+             plot_dictionary: plot_dictionary_type = None, axis: Optional[plt.Axes] = None) -> plt.Axes:
+    """
+    Plot two sets of y-data (`y1_data` and `y2_data`) against the same x-data (`x_data`) on the same plot.
+
+    Parameters
+    ----------
+    x_data : np.ndarray
+        The x-axis data for both plots.
+    y1_data : np.ndarray
+        The first set of y-axis data to be plotted against `x_data`.
+    y2_data : np.ndarray
+        The second set of y-axis data to be plotted against `x_data`.
+    data_labels : list of str, optional
+        The labels for the two datasets. Default is `['X vs Y1', 'X vs Y2']`.
+    auto_label : bool, optional
+        Whether to automatically label the plot. Default is `False`.
+    is_scatter : bool, optional
+        Whether to create a scatter plot (`True`) or a line plot (`False`). Default is `False`.
+    fig_size : tuple of int, optional
+        The size of the figure as a tuple `(width, height)`. Default is `None`, which uses the default figure size.
+    plot_dictionary : dict, optional
+        A dictionary containing plot configuration parameters for the two datasets. Default is `None`.
+    axis : plt.Axes, optional
+        A Matplotlib axis to plot on. If `None`, a new axis is created. Default is `None`.
+
+    Returns
+    -------
+    plt.Axes
+        The axis object containing the plotted data.
+    """
+    data_labels = ['X vs Y1', 'X vs Y2'] if data_labels is None else data_labels
+    plot_config_1, plot_config_2 = split_dictionary(plot_dictionary)
+    
+    axis = plot_xy(x_data, y1_data, data_labels[0], auto_label, is_scatter, fig_size, plot_config_1, axis)
+    axis = plot_xy(x_data, y2_data, data_labels[1], auto_label, is_scatter, fig_size, plot_config_2, axis)
+    
+    return axis
 
 
 def plot_xy(x_data: np.ndarray, y_data: np.ndarray,
             data_label: str = 'X1 vs Y1',
-            auto_label: bool = False,
-            is_scatter: bool = False,
+            auto_label: bool = False, is_scatter: bool = False,
             fig_size: Optional[Tuple[int, int]] = None,
             plot_dictionary: Optional[plot_dictionary_type] = None,
             axis: Optional[plt.axis] = None) -> axis_return:
@@ -106,7 +148,8 @@ def plot_xy(x_data: np.ndarray, y_data: np.ndarray,
     list:
         Either a single or double axis list.
     """
-    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, x1y1_label=data_label, auto_label=auto_label, is_scatter=is_scatter, fig_size=fig_size,
+    return plot_with_dual_axes(x1_data=x_data, y1_data=y_data, x1y1_label=data_label, auto_label=auto_label,
+                               is_scatter=is_scatter, fig_size=fig_size,
                                plot_dictionary=plot_dictionary, axis=axis)
 
 
@@ -168,49 +211,49 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
         raise ValueError("Dual X-axis plot requested but 'y2_data' given.")
     if len(x1_data) == 0 or len(y1_data) == 0:
         raise ValueError("Primary x or y data is empty. Please provide valid data.")
-
+    
     if axis:
         ax1 = axis
     else:
         _, ax1 = plt.subplots(figsize=fig_size if fig_size else rcParams["figure.figsize"])
-
+    
     plot_items = plot_dictionary_handler(plot_dictionary=plot_dictionary)
-
+    
     dict1 = {key: (value[0] if isinstance(value, list) else value) for key, value in plot_items}
     use_secondary_values = x2_data is not None or y2_data is not None or use_twin_x
     dict2 = {key: (value[1] if use_secondary_values else None) for key, value in plot_items}
-
+    
     plot_or_scatter(axes=ax1, scatter=is_scatter)(x1_data, y1_data, label=x1y1_label, **dict1)
-
+    
     ax2 = None
-
+    
     if auto_label:
         ax1.set_xlabel('X1')
         ax1.set_ylabel('Y1')
         ax1.set_title('Plot')
-
+    
     if use_twin_x:
         ax2 = ax1.twinx()
         plot_or_scatter(axes=ax2, scatter=is_scatter)(x1_data, y2_data, label=x1y2_label, **dict2)
         if auto_label:
             ax2.set_ylabel('Y2')
-
+    
     elif x2_data is not None:
         ax2 = ax1.twiny()
         plot_or_scatter(axes=ax2, scatter=is_scatter)(x2_data, y1_data, label=x2y1_label, **dict2)
         if auto_label:
             ax2.set_xlabel('X2')
-
+    
     handles, labels = ax1.get_legend_handles_labels()
     if ax2:
         handles2, labels2 = ax2.get_legend_handles_labels()
         handles += handles2
         labels += labels2
-
+    
     ax1.legend(handles, labels, loc='best')
-
+    
     plt.tight_layout()
-
+    
     return (ax1, ax2) if ax2 else ax1
 
 
@@ -268,7 +311,7 @@ def two_subplots(x_data: List[np.ndarray], y_data: List[np.ndarray],
         n_rows, n_cols = 2, 1
     else:
         raise OrientationError("The orientation must be either \'h\' or \'v\'.")
-
+    
     return n_plotter(x_data=x_data, y_data=y_data,
                      n_rows=n_rows, n_cols=n_cols,
                      x_labels=x_labels, y_labels=y_labels, data_labels=data_labels,
@@ -278,7 +321,8 @@ def two_subplots(x_data: List[np.ndarray], y_data: List[np.ndarray],
 
 def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
               n_rows: int, n_cols: int,
-              x_labels: Optional[List[str]] = None, y_labels: Optional[List[str]] = None, data_labels: Optional[List[str]] = None,
+              x_labels: Optional[List[str]] = None, y_labels: Optional[List[str]] = None,
+              data_labels: Optional[List[str]] = None,
               auto_label: bool = False,
               is_scatter: bool = False,
               subplot_dictionary: Optional[SubPlots] = None,
@@ -322,16 +366,17 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
     #   Handles multi-row and multi-column subplots as well
     #   Slight modification in multi-row and multi-column subplot decorations
     sp_dict = subplot_dictionary.get() if subplot_dictionary else SubPlots().get()
-
+    
     fig, axs = plt.subplots(n_rows, n_cols, **sp_dict)
     axs = axs.flatten()
-
+    
     plot_items = plot_dictionary_handler(plot_dictionary=plot_dictionary)
-
+    
     main_dict = [{key: value[c] for key, value in plot_items} for c in range(n_cols * n_rows)]
-
-    x_labels, y_labels = label_handler(x_labels=x_labels, y_labels=y_labels, n_rows=n_rows, n_cols=n_cols, auto_label=auto_label)
-
+    
+    x_labels, y_labels = label_handler(x_labels=x_labels, y_labels=y_labels, n_rows=n_rows, n_cols=n_cols,
+                                       auto_label=auto_label)
+    
     shared_y = sp_dict.get('sharey')
     shared_x1 = sp_dict.get('sharex')
     shared_x2 = len(axs) - int(len(axs) / n_rows if n_rows > n_cols else n_cols)
@@ -346,7 +391,7 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
         if not (shared_y and index % n_cols != 0):
             ax.set_ylabel(k)
         ax.legend(loc='best')
-
+    
     plt.tight_layout()
-
+    
     return fig, axs

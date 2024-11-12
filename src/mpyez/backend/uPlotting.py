@@ -1,15 +1,17 @@
 """Created on Oct 29 09:33:06 2024"""
 
-__all__ = ['LinePlot', 'ScatterPlot', 'SubPlots', 'label_handler', 'plot_or_scatter', 'plot_dictionary_handler']
+__all__ = ['LinePlot', 'ScatterPlot', 'SubPlots', 'label_handler', 'plot_or_scatter', 'plot_dictionary_handler',
+           'split_dictionary']
 
 import warnings
-from typing import List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from matplotlib import pyplot as plt, rcParams
 
 from .ePlotting import NoXYLabels
 
 rc_color = rcParams['axes.prop_cycle'].by_key()['color'] * 10
+_split = Tuple[Union['LinePlot', 'ScatterPlot'], Union['LinePlot', 'ScatterPlot']]
 
 
 class _PlotParams:
@@ -43,7 +45,7 @@ class _PlotParams:
     face_color : list(str), optional
         Color of the marker faces in scatter plots. Default is None.
     """
-
+    
     def __init__(self,
                  line_style=None, line_width=None,
                  color=None, alpha=None,
@@ -51,7 +53,7 @@ class _PlotParams:
                  marker_edge_color=None, marker_face_color=None, marker_edge_width=None,
                  size=None, cmap=None, face_color=None,
                  share_x=None, share_y=None, subplot_fig_size=None):
-
+        
         self.line_style = line_style
         self.line_width = line_width
         self.color = color
@@ -61,17 +63,29 @@ class _PlotParams:
         self.marker_edge_color = marker_edge_color
         self.marker_face_color = marker_face_color
         self.marker_edge_width = marker_edge_width
-
+        
         # Additional keywords for scatter plot
         self.size = size
         self.cmap = cmap
         self.face_color = face_color
-
+        
         # Additional keywords for subplots
         self.share_x = share_x
         self.share_y = share_y
         self.fig_size = subplot_fig_size
+    
+    def to_dict(self) -> dict:
+        """
+        Convert the plot parameters to a dictionary.
 
+        Returns
+        -------
+        dict
+            A dictionary where keys are parameter labels and values are the corresponding
+            plot parameters. Parameters that are `None` are also included in the dictionary.
+        """
+        return {label: param for label, param in zip(self._all_labels(), self._all_parameters())}
+    
     def get(self):
         """
         Get the dictionary of plot parameters, excluding None values.
@@ -82,16 +96,16 @@ class _PlotParams:
             Dictionary containing non-None parameters for the plot.
         """
         param_dict = {}
-
+        
         for param, label in zip(self._all_parameters(), self._all_labels()):
             if param is not None:
                 param_dict[f'{label}'] = param
-
+        
         return param_dict
-
+    
     def _all_parameters(self):
         raise NotImplementedError("This method should be implemented by subclasses.")
-
+    
     def _all_labels(self):
         raise NotImplementedError("This method should be implemented by subclasses.")
 
@@ -104,24 +118,66 @@ class LinePlot(_PlotParams):
     ----------
     All parameters are inherited from `_PlotParams`.
     """
+    
+    def __init__(self, line_style=None, line_width=None, color=None, alpha=None,
+                 marker=None, marker_size=None, marker_edge_color=None,
+                 marker_face_color=None, marker_edge_width=None, _fixed: int = 0):
+        super().__init__(line_style=line_style, line_width=line_width, color=color,
+                         alpha=alpha, marker=marker, marker_size=marker_size,
+                         marker_edge_color=marker_edge_color, marker_face_color=marker_face_color,
+                         marker_edge_width=marker_edge_width)
+        self.color = color or rc_color
+    
+    def __repr__(self):
+        param_str = ', '.join(f"{key}={value!r}" for key, value in self.to_dict().items())
+        return f"{self.__class__.__name__}({param_str})"
+    
+    def __eq__(self, other):
+        if not isinstance(other, LinePlot):
+            return NotImplemented
+        return self.to_dict() == other.to_dict()
+    
+    def __hash__(self):
+        # Hash based on the tuple of sorted key-value pairs in the dictionary
+        return hash(tuple(sorted(self.to_dict().items())))
+    
+    @classmethod
+    def populate(cls, dictionary: Dict[str, Any]) -> 'LinePlot':
+        """
+        Create an instance of `LinePlot` from a dictionary of parameters.
 
-    def __init__(self,
-                 line_style=None, line_width=None,
-                 color=None, alpha=None,
-                 marker=None, marker_size=None,
-                 marker_edge_color=None, marker_face_color=None, marker_edge_width=None, _fixed: int = 0):
-        super().__init__(line_style=line_style, line_width=line_width, color=color, alpha=alpha, marker=marker, marker_size=marker_size,
-                         marker_edge_color=marker_edge_color, marker_face_color=marker_face_color, marker_edge_width=marker_edge_width)
+        Parameters
+        ----------
+        dictionary : dict
+            A dictionary where keys represent parameter labels (e.g., 'ls' for line style, 'lw' for line width),
+            and values represent the corresponding values for each parameter.
 
-        if self.color is None:
-            self.color = rc_color
-
+        Returns
+        -------
+        LinePlot
+            An instance of `LinePlot` with attributes populated based on the provided dictionary.
+        """
+        instance = cls()
+        for key, value in dictionary.items():
+            attr_name = {'ls': 'line_style',
+                         'lw': 'line_width',
+                         'color': 'color',
+                         'alpha': 'alpha',
+                         'marker': 'marker',
+                         'ms': 'marker_size',
+                         'mec': 'marker_edge_color',
+                         'mfc': 'marker_face_color',
+                         'mew': 'marker_edge_width'}.get(key, key)
+            setattr(instance, attr_name, value)
+        
+        return instance
+    
     def _all_parameters(self):
         return [self.line_style, self.line_width,
                 self.color, self.alpha,
                 self.marker, self.marker_size,
                 self.marker_edge_color, self.marker_face_color, self.marker_edge_width]
-
+    
     def _all_labels(self):
         return ['ls', 'lw', 'color', 'alpha', 'marker', 'ms', 'mec', 'mfc', 'mew']
 
@@ -134,35 +190,74 @@ class ScatterPlot(_PlotParams):
     ----------
     All parameters are inherited from `_PlotParams`.
     """
-
-    def __init__(self, size=None, color=None, marker=None, cmap=None, alpha=None, face_color=None):
+    
+    def __init__(self, color=None, alpha=None, marker=None, size=None, cmap=None, face_color=None):
         super().__init__(color=color, alpha=alpha, marker=marker, size=size, cmap=cmap, face_color=face_color)
-
+        
         if self.color is None:
             self.color = rc_color
+    
+    def __repr__(self):
+        param_str = ', '.join(f"{key}={value!r}" for key, value in self.to_dict().items())
+        return f"{self.__class__.__name__}({param_str})"
+    
+    def __eq__(self, other):
+        if not isinstance(other, LinePlot):
+            return NotImplemented
+        return self.to_dict() == other.to_dict()
+    
+    def __hash__(self):
+        # Hash based on the tuple of sorted key-value pairs in the dictionary
+        return hash(tuple(sorted(self.to_dict().items())))
+    
+    @classmethod
+    def populate(cls, dictionary: Dict[str, Any]) -> 'ScatterPlot':
+        """
+        Create an instance of `ScatterPlot` from a dictionary of parameters.
 
+        Parameters
+        ----------
+        dictionary : dict
+            A dictionary where keys represent parameter labels (e.g., 's' for size, 'c' for color), and values represent the corresponding values for each parameter.
+
+        Returns
+        -------
+        ScatterPlot
+            An instance of `ScatterPlot` with attributes populated based on the provided dictionary.
+        """
+        instance = cls()
+        for key, value in dictionary.items():
+            attr_name = {'c': 'color',
+                         'alpha': 'alpha',
+                         'marker': 'marker',
+                         's': 'size',
+                         'cmap': 'cmap',
+                         'fc': 'face_color'}.get(key, key)
+            setattr(instance, attr_name, value)
+        
+        return instance
+    
     def _all_parameters(self):
-        return [self.size, self.color, self.marker, self.cmap, self.alpha, self.face_color]
-
+        return [self.color, self.alpha, self.marker, self.size, self.cmap, self.face_color]
+    
     def _all_labels(self):
-        return ['s', 'c', 'marker', 'cmap', 'alpha', 'fc']
+        return ['c', 'alpha', 'marker', 's', 'cmap', 'fc']
 
 
 class SubPlots(_PlotParams):
-
+    
     def __init__(self, share_x=None, share_y=None, fig_size=None):
         super().__init__(share_x=share_x, share_y=share_y, subplot_fig_size=fig_size)
-
+    
     def _all_labels(self):
         return ['sharex', 'sharey', 'figsize']
-
+    
     def _all_parameters(self):
         return [self.share_x, self.share_y, self.fig_size]
 
 
 def label_handler(x_labels: Optional[List[str]], y_labels: Optional[List[str]],
-                  n_rows: int, n_cols: int,
-                  auto_label: bool) -> Tuple[List[str], List[str]]:
+                  n_rows: int, n_cols: int, auto_label: bool) -> Tuple[List[str], List[str]]:
     """
     Handles the generation or validation of x and y labels for a subplot configuration.
 
@@ -198,7 +293,7 @@ def label_handler(x_labels: Optional[List[str]], y_labels: Optional[List[str]],
     """
     if not auto_label and (x_labels is None or y_labels is None):
         raise NoXYLabels("Both x_labels and y_labels are required without the auto_label parameter.")
-
+    
     elif auto_label and (x_labels is None or y_labels is None):
         if x_labels is None and y_labels is None:
             pass
@@ -207,7 +302,7 @@ def label_handler(x_labels: Optional[List[str]], y_labels: Optional[List[str]],
                 warnings.warn("y_labels given but x_labels is missing, applying auto-labeling...", UserWarning)
             if y_labels is None:
                 warnings.warn("x_labels given but y_labels is missing, applying auto-labeling...", UserWarning)
-
+    
     if auto_label:
         if x_labels and y_labels:
             start = "auto_label selected with x_labels and y_labels provided"
@@ -220,7 +315,7 @@ def label_handler(x_labels: Optional[List[str]], y_labels: Optional[List[str]],
         else:
             x_labels = [fr'X$_{i + 1}$' for i in range(n_cols * n_rows)]
             y_labels = [fr'Y$_{i + 1}$' for i in range(n_cols * n_rows)]
-
+    
     return x_labels, y_labels
 
 
@@ -260,3 +355,44 @@ def plot_dictionary_handler(plot_dictionary: Union[LinePlot, ScatterPlot]):
         An iterable of items (key-value pairs) from the specified or default plot dictionary.
     """
     return plot_dictionary.get().items() if plot_dictionary else LinePlot().get().items()
+
+
+def split_dictionary(plot_instance: Union[LinePlot, ScatterPlot]) -> _split:
+    """
+    Split a `LinePlot` or `ScatterPlot` instance's parameters into two separate instances of the same type.
+
+    Parameters
+    ----------
+    plot_instance : Union[LinePlot, ScatterPlot]
+        An instance of `LinePlot` or `ScatterPlot` with parameters stored as lists or tuples of two elements.
+        Each parameter should be a list or tuple containing exactly two values, corresponding to settings
+        for the two resulting instances.
+
+    Returns
+    -------
+    Tuple[Union[LinePlot, ScatterPlot], Union[LinePlot, ScatterPlot]]
+        Two instances of the same type as `plot_instance` (either `LinePlot` or `ScatterPlot`),
+        with parameters split based on the values in `plot_instance`. The first instance (`instance1`)
+        and second instance (`instance2`) will have their attributes set according to the first and second
+        elements, respectively, from each list or tuple in `plot_instance`.
+
+    Raises
+    ------
+    ValueError
+        If any parameter in `plot_instance` is not a list or tuple with exactly two elements.
+    """
+    # Flatten the parameters from the input plot instance
+    parameters = plot_instance.get()
+    params_instance1, params_instance2 = {}, {}
+    
+    # Split each parameter into two separate dictionaries for the two instances
+    for param_name, values in parameters.items():
+        if isinstance(values, (list, tuple)) and len(values) == 2:
+            params_instance1[param_name], params_instance2[param_name] = values
+        else:
+            raise ValueError(f"Parameter '{param_name}' must be a list or tuple with exactly two elements.")
+    
+    instance1 = plot_instance.__class__.populate(params_instance1)
+    instance2 = plot_instance.__class__.populate(params_instance2)
+    
+    return instance1, instance2
