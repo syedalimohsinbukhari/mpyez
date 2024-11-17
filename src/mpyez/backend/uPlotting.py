@@ -1,17 +1,20 @@
 """Created on Oct 29 09:33:06 2024"""
 
 __all__ = ['LinePlot', 'ScatterPlot', 'SubPlots', 'label_handler', 'plot_or_scatter', 'plot_dictionary_handler',
-           'split_dictionary']
+           'split_dictionary', 'dual_axes_data_validation', 'dual_axes_label_management']
 
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 from matplotlib import pyplot as plt, rcParams
 
 from .ePlotting import NoXYLabels
 
+# SAFEGUARDS:
 rc_color = rcParams['axes.prop_cycle'].by_key()['color'] * 10
 _split = Tuple[Union['LinePlot', 'ScatterPlot'], Union['LinePlot', 'ScatterPlot']]
+label_management = Tuple[str, str, str, str, List[str]]
 
 
 class _PlotParams:
@@ -396,3 +399,127 @@ def split_dictionary(plot_instance: Union[LinePlot, ScatterPlot]) -> _split:
     instance2 = plot_instance.__class__.populate(params_instance2)
     
     return instance1, instance2
+
+
+def dual_axes_data_validation(x1_data: np.ndarray, x2_data: Optional[np.ndarray],
+                              y1_data: np.ndarray, y2_data: Optional[np.ndarray],
+                              use_twin_x: bool, axis_labels: Union[List[str], str]) -> None:
+    """
+    Validates the data and parameters for dual-axes plotting.
+
+    Parameters
+    ----------
+    x1_data : np.ndarray
+        Data for the primary x-axis.
+    x2_data : Optional[np.ndarray]
+        Data for the secondary x-axis (used in dual x-axis plots). Should be `None` if `use_twin_x` is True.
+    y1_data : np.ndarray
+        Data for the primary y-axis.
+    y2_data : Optional[np.ndarray]
+        Data for the secondary y-axis (used in dual y-axis plots). Should be `None` if `use_twin_x` is False.
+    use_twin_x : bool
+        If True, a dual y-axis plot is expected; otherwise, a dual x-axis plot is expected.
+    axis_labels : List[str]
+        List of axis labels. Must have exactly three elements:
+        - Label for the x-axis of the primary plot.
+        - Label for the y-axis of the primary plot.
+        - Label for the secondary axis (x or y).
+
+    Raises
+    ------
+    ValueError
+        If any of the following conditions are met:
+        - `axis_labels` does not have exactly three elements.
+        - `x1_data` or `y1_data` is empty.
+        - `x2_data` is provided when `use_twin_x` is True.
+        - `y2_data` is provided when `use_twin_x` is False.
+    """
+    if len(axis_labels) != 3:
+        raise ValueError("The axis_labels should have a length of 3.")
+    if len(x1_data) == 0 or len(y1_data) == 0:
+        raise ValueError("Primary x or y data is empty. Please provide valid data.")
+    if use_twin_x and x2_data is not None:
+        raise ValueError("Dual Y-axis plot requested but 'x2_data' given.")
+    if not use_twin_x and y2_data is not None:
+        raise ValueError("Dual X-axis plot requested but 'y2_data' given.")
+
+
+def dual_axes_label_management(x1y1_label: Optional[str], x1y2_label: Optional[str], x2y1_label: Optional[str],
+                               auto_label: bool, axis_labels: Optional[List[str]], plot_title: Optional[str],
+                               use_twin_x: bool) -> label_management:
+    """
+    Manages labels and titles for dual-axes plots, with options for automatic labeling.
+
+    Parameters
+    ----------
+    x1y1_label : Optional[str]
+        Label for the primary plot (X1 vs Y1).
+    x1y2_label : Optional[str]
+        Label for the secondary Y-axis plot (X1 vs Y2), used if `use_twin_x` is True.
+    x2y1_label : Optional[str]
+        Label for the secondary X-axis plot (X2 vs Y1), used if `use_twin_x` is False.
+    auto_label : bool
+        If True, automatically fills in missing labels and title with defaults.
+    axis_labels : Optional[List[str]]
+        A list of axis labels. If provided, must contain three strings.
+        - For dual Y-axis: [primary x-axis label, primary y-axis label, secondary y-axis label].
+        - For dual X-axis: [primary x-axis label, primary y-axis label, secondary x-axis label].
+    plot_title : Optional[str]
+        Title of the plot. If None and `auto_label` is True, a default title will be used.
+    use_twin_x : bool
+        If True, indicates a dual Y-axis plot (X1 vs Y1 and X1 vs Y2).
+        If False, indicates a dual X-axis plot (X1 vs Y1 and X2 vs Y1).
+
+    Returns
+    -------
+    Tuple[str, str, str, str, List[str]]
+        A tuple containing:
+        - x1y1_label: The finalized label for the primary plot.
+        - x1y2_label: The finalized label for the secondary Y-axis plot.
+        - x2y1_label: The finalized label for the secondary X-axis plot.
+        - plot_title: The finalized plot title.
+        - axis_labels: The finalized axis labels as a list of three strings.
+
+    Notes
+    -----
+    - If `auto_label` is True, missing labels are replaced with default values:
+        - Default axis labels:
+            - Dual Y-axis: ['X', 'Y1', 'Y2']
+            - Dual X-axis: ['X1', 'Y', 'X2']
+        - Default data labels:
+            - Dual Y-axis: ['X1 vs Y1', 'X1 vs Y2']
+            - Dual X-axis: ['Y vs X1', 'X2 vs Y1']
+        - Default title: 'Plot'.
+    - If `auto_label` is False and labels are missing, they are replaced with empty strings.
+
+    Examples
+    --------
+    >>> dual_axes_label_management(None, None, None, True, None, None, True)
+    ('X1 vs Y1', 'X1 vs Y2', '', 'Plot', ['X', 'Y1', 'Y2'])
+
+    >>> dual_axes_label_management("Primary", None, None, False, ['Time', 'Value', 'Frequency'], "Custom Plot", False)
+    ('Primary', '', '', 'Custom Plot', ['Time', 'Value', 'Frequency'])
+    """
+    # Set defaults for axis labels and data labels based on `use_twin_x`
+    default_axis_labels = ['X', 'Y1', 'Y2'] if use_twin_x else ['X1', 'Y', 'X2']
+    default_data_labels = ['X1 vs Y1', 'X1 vs Y2'] if use_twin_x else ['Y vs X1', 'X2 vs Y1']
+    default_title = 'Plot'
+    
+    if auto_label:
+        # Use defaults for missing labels
+        axis_labels = axis_labels or default_axis_labels
+        x1y1_label = x1y1_label or default_data_labels[0]
+        if use_twin_x:
+            x1y2_label = x1y2_label or default_data_labels[1]
+        else:
+            x2y1_label = x2y1_label or default_data_labels[1]
+        plot_title = plot_title or default_title
+    else:
+        # If auto_label is False, use provided labels or leave blank
+        axis_labels = axis_labels or ['', '', '']
+        x1y1_label = x1y1_label or ''
+        x1y2_label = x1y2_label or ''
+        x2y1_label = x2y1_label or ''
+        plot_title = plot_title or ''
+    
+    return x1y1_label, x1y2_label, x2y1_label, plot_title, axis_labels

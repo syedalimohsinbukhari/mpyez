@@ -153,11 +153,13 @@ def plot_xyy(x_data: np.ndarray, y1_data: np.ndarray, y2_data: np.ndarray,
 
 def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
                         x2_data: np.ndarray = None, y2_data: np.ndarray = None,
-                        x1y1_label: str = 'X vs Y1',
-                        x1y2_label: str = 'X vs Y2',
-                        x2y1_label: str = 'Y vs X2',
+                        x1y1_label: str = None,
+                        x1y2_label: str = None,
+                        x2y1_label: str = None,
                         use_twin_x: bool = False,
                         auto_label: bool = False,
+                        axis_labels: List[str] = None,
+                        plot_title: str = None,
                         is_scatter: bool = False,
                         plot_dictionary: Optional[plot_dictionary_type] = None,
                         axis: Optional[plt.axis] = None) -> axis_return:
@@ -175,20 +177,23 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     y2_data : np.ndarray, optional
         Data for the secondary y-axis (used for dual y-axis plots).
     x1y1_label : str, optional
-        Label for the plot of X1 vs Y1. Default is 'X1 vs Y1'.
+        Label for the plot of X1 vs Y1. If None and `auto_label` is True, defaults to 'X1 vs Y1'.
     x1y2_label : str, optional
-        Label for the plot of X1 vs Y2 (when using dual Y-axes). Default is 'X1 vs Y2'.
+        Label for the plot of X1 vs Y2 (when using dual Y-axes). If None and `auto_label` is True, defaults to 'X1 vs Y2'.
     x2y1_label : str, optional
-        Label for the plot of X2 vs Y1 (when using dual X-axes). Default is 'X2 vs Y1'.
+        Label for the plot of X2 vs Y1 (when using dual X-axes). If None and `auto_label` is True, defaults to 'X2 vs Y1'.
     use_twin_x : bool, optional
         If True, creates dual y-axis plot. If False, creates dual x-axis plot. Default is False.
     auto_label : bool, optional
-        If True, automatically labels the axes and plot title. Default is False.
+        If True, automatically assigns labels if none are provided. Default is False.
+    axis_labels : list of str, optional
+        List of axis labels in the form [xlabel, ylabel1, ylabel2]. If None and `auto_label` is True, defaults to ['X', 'Y1', 'Y2'] or ['X1', 'Y', 'X2'].
+    plot_title : str, optional
+        Title of the plot. If None and `auto_label` is True, defaults to 'Plot'. If None and `auto_label` is False, no title is added.
     is_scatter : bool, optional
         If True, creates scatter plot; otherwise, line plot. Default is False.
     plot_dictionary: Union[LinePlot, ScatterPlot], optional
-        An object representing the plot data, either a `LinePlot` or `ScatterPlot`,  to be passed to the matplotlib plotting library.
-         If None, a default plot type will be used.
+        An object representing the plot data, either a `LinePlot` or `ScatterPlot`, to be passed to the matplotlib plotting library.
     axis: Optional[plt.axis]
         The axis object to draw the plots on. If not passed, a new axis object will be created internally.
 
@@ -202,15 +207,18 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
     #   - Works with default `fig_size` if no figure size is specified
     #   - Simplified the workings of data labels
     #   - Removed `fig_size` parameter
+    #   - Handles `auto_label`, `axis_labels` and `plot_title` separately
+    #   - Handles empty labels correctly as well
+    #   - Can deal with labels and data validations
     
-    data_labels = [x1y1_label, x1y2_label] if use_twin_x else ['Y vs X1', x2y1_label]
-
-    if use_twin_x and x2_data is not None:
-        raise ValueError("Dual Y-axis plot requested but 'x2_data' given.")
-    if not use_twin_x and y2_data is not None:
-        raise ValueError("Dual X-axis plot requested but 'y2_data' given.")
-    if len(x1_data) == 0 or len(y1_data) == 0:
-        raise ValueError("Primary x or y data is empty. Please provide valid data.")
+    labels = uPl.dual_axes_label_management(x1y1_label=x1y1_label, x1y2_label=x1y2_label, x2y1_label=x2y1_label,
+                                            auto_label=auto_label, axis_labels=axis_labels, plot_title=plot_title,
+                                            use_twin_x=use_twin_x)
+    
+    x1y1_label, x1y2_label, x2y1_label, plot_title, axis_labels = labels
+    
+    uPl.dual_axes_data_validation(x1_data=x1_data, x2_data=x2_data, y1_data=y1_data, y2_data=y2_data,
+                                  use_twin_x=use_twin_x, axis_labels=axis_labels)
     
     if axis:
         ax1 = axis
@@ -218,39 +226,35 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
         _, ax1 = plt.subplots(figsize=rcParams["figure.figsize"])
     
     plot_items = uPl.plot_dictionary_handler(plot_dictionary=plot_dictionary)
-    
     dict1 = {key: (value[0] if isinstance(value, list) else value) for key, value in plot_items}
-    use_secondary_values = x2_data is not None or y2_data is not None or use_twin_x
-    dict2 = {key: (value[1] if use_secondary_values else None) for key, value in plot_items}
-    
-    uPl.plot_or_scatter(axes=ax1, scatter=is_scatter)(x1_data, y1_data, label=data_labels[0], **dict1)
+    uPl.plot_or_scatter(axes=ax1, scatter=is_scatter)(x1_data, y1_data, label=x1y1_label, **dict1)
     
     ax2 = None
-    
-    if auto_label:
-        ax1.set_xlabel('X' if use_twin_x else 'X1')
-        ax1.set_ylabel('Y' if not use_twin_x else 'Y1')
-        ax1.set_title('Plot')
+    ax1.set_xlabel(axis_labels[0])
+    ax1.set_ylabel(axis_labels[1])
+    if plot_title:
+        ax1.set_title(plot_title)
     
     if use_twin_x:
         ax2 = ax1.twinx()
-        uPl.plot_or_scatter(axes=ax2, scatter=is_scatter)(x1_data, y2_data, label=data_labels[1], **dict2)
-        if auto_label:
-            ax2.set_ylabel('Y2')
-    
+        if y2_data is not None:
+            dict2 = {key: (value[1] if len(value) > 1 else None) for key, value in plot_items}
+            uPl.plot_or_scatter(axes=ax2, scatter=is_scatter)(x1_data, y2_data, label=x1y2_label, **dict2)
+            ax2.set_ylabel(axis_labels[2])
+
     elif x2_data is not None:
         ax2 = ax1.twiny()
-        uPl.plot_or_scatter(axes=ax2, scatter=is_scatter)(x2_data, y1_data, label=data_labels[1], **dict2)
-        if auto_label:
-            ax2.set_xlabel('X2')
+        dict2 = {key: (value[1] if len(value) > 1 else None) for key, value in plot_items}
+        uPl.plot_or_scatter(axes=ax2, scatter=is_scatter)(x2_data, y1_data, label=x2y1_label, **dict2)
+        ax2.set_xlabel(axis_labels[2])
     
-    handles, labels = ax1.get_legend_handles_labels()
-    if ax2:
-        handles2, labels2 = ax2.get_legend_handles_labels()
-        handles += handles2
-        labels += labels2
-    
-    ax1.legend(handles, labels, loc='best')
+    if x1y1_label or x1y2_label or x2y1_label:
+        handles, labels = ax1.get_legend_handles_labels()
+        if ax2:
+            handles2, labels2 = ax2.get_legend_handles_labels()
+            handles += handles2
+            labels += labels2
+        ax1.legend(handles, labels, loc='best')
     
     plt.tight_layout()
     
