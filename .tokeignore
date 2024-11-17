@@ -2,3 +2,4 @@
 setup.cfg
 setup.py
 pyproject.toml
+environment.yaml
