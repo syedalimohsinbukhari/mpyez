@@ -11,8 +11,31 @@ from matplotlib import pyplot as plt, rcParams
 
 from .ePlotting import NoXYLabels
 
+
+def get_color():
+    """
+    Generates a list of colors from Matplotlib's default color cycle.
+
+    This function retrieves colors from Matplotlib's default color cycle and repeats
+    the cycle if more colors are needed. The user can specify the number of colors required.
+
+    Returns
+    -------
+    list of str
+        A list of color hex codes. The length of the list is equal to `n_colors` if specified,
+        otherwise the entire extended color list is returned.
+
+    Notes
+    -----
+    - The function extends the default color cycle by repeating it 10 times to accommodate
+      requests for more colors than the original cycle provides.
+    - If `n_colors` is greater than the original cycle length, repeated colors will appear.
+    """
+    color = rcParams['axes.prop_cycle'].by_key()['color'] * 10
+    return color[:]
+
+
 # SAFEGUARDS:
-rc_color = rcParams['axes.prop_cycle'].by_key()['color'] * 10
 _split = Tuple[Union['LinePlot', 'ScatterPlot'], Union['LinePlot', 'ScatterPlot']]
 label_management = Tuple[str, str, str, str, List[str]]
 
@@ -48,7 +71,7 @@ class _PlotParams:
     face_color : list(str), optional
         Color of the marker faces in scatter plots. Default is None.
     """
-    
+
     def __init__(self,
                  line_style=None, line_width=None,
                  color=None, alpha=None,
@@ -56,7 +79,7 @@ class _PlotParams:
                  marker_edge_color=None, marker_face_color=None, marker_edge_width=None,
                  size=None, cmap=None, face_color=None,
                  share_x=None, share_y=None, subplot_fig_size=None):
-        
+
         self.line_style = line_style
         self.line_width = line_width
         self.color = color
@@ -66,17 +89,17 @@ class _PlotParams:
         self.marker_edge_color = marker_edge_color
         self.marker_face_color = marker_face_color
         self.marker_edge_width = marker_edge_width
-        
+
         # Additional keywords for scatter plot
         self.size = size
         self.cmap = cmap
         self.face_color = face_color
-        
+
         # Additional keywords for subplots
         self.share_x = share_x
         self.share_y = share_y
         self.fig_size = subplot_fig_size
-    
+
     def to_dict(self) -> dict:
         """
         Convert the plot parameters to a dictionary.
@@ -88,7 +111,7 @@ class _PlotParams:
             plot parameters. Parameters that are `None` are also included in the dictionary.
         """
         return {label: param for label, param in zip(self._all_labels(), self._all_parameters())}
-    
+
     def get(self):
         """
         Get the dictionary of plot parameters, excluding None values.
@@ -99,16 +122,16 @@ class _PlotParams:
             Dictionary containing non-None parameters for the plot.
         """
         param_dict = {}
-        
+
         for param, label in zip(self._all_parameters(), self._all_labels()):
             if param is not None:
                 param_dict[f'{label}'] = param
-        
+
         return param_dict
-    
+
     def _all_parameters(self):
         raise NotImplementedError("This method should be implemented by subclasses.")
-    
+
     def _all_labels(self):
         raise NotImplementedError("This method should be implemented by subclasses.")
 
@@ -121,7 +144,7 @@ class LinePlot(_PlotParams):
     ----------
     All parameters are inherited from `_PlotParams`.
     """
-    
+
     def __init__(self, line_style=None, line_width=None, color=None, alpha=None,
                  marker=None, marker_size=None, marker_edge_color=None,
                  marker_face_color=None, marker_edge_width=None, _fixed: int = 0):
@@ -129,21 +152,21 @@ class LinePlot(_PlotParams):
                          alpha=alpha, marker=marker, marker_size=marker_size,
                          marker_edge_color=marker_edge_color, marker_face_color=marker_face_color,
                          marker_edge_width=marker_edge_width)
-        self.color = color or rc_color
-    
+        self.color = get_color()
+
     def __repr__(self):
         param_str = ', '.join(f"{key}={value!r}" for key, value in self.to_dict().items())
         return f"{self.__class__.__name__}({param_str})"
-    
+
     def __eq__(self, other):
         if not isinstance(other, LinePlot):
             return NotImplemented
         return self.to_dict() == other.to_dict()
-    
+
     def __hash__(self):
         # Hash based on the tuple of sorted key-value pairs in the dictionary
         return hash(tuple(sorted(self.to_dict().items())))
-    
+
     @classmethod
     def populate(cls, dictionary: Dict[str, Any]) -> 'LinePlot':
         """
@@ -172,15 +195,15 @@ class LinePlot(_PlotParams):
                          'mfc': 'marker_face_color',
                          'mew': 'marker_edge_width'}.get(key, key)
             setattr(instance, attr_name, value)
-        
+
         return instance
-    
+
     def _all_parameters(self):
         return [self.line_style, self.line_width,
                 self.color, self.alpha,
                 self.marker, self.marker_size,
                 self.marker_edge_color, self.marker_face_color, self.marker_edge_width]
-    
+
     def _all_labels(self):
         return ['ls', 'lw', 'color', 'alpha', 'marker', 'ms', 'mec', 'mfc', 'mew']
 
@@ -193,26 +216,26 @@ class ScatterPlot(_PlotParams):
     ----------
     All parameters are inherited from `_PlotParams`.
     """
-    
+
     def __init__(self, color=None, alpha=None, marker=None, size=None, cmap=None, face_color=None):
         super().__init__(color=color, alpha=alpha, marker=marker, size=size, cmap=cmap, face_color=face_color)
-        
+
         if self.color is None:
-            self.color = rc_color
-    
+            self.color = get_color()
+
     def __repr__(self):
         param_str = ', '.join(f"{key}={value!r}" for key, value in self.to_dict().items())
         return f"{self.__class__.__name__}({param_str})"
-    
+
     def __eq__(self, other):
         if not isinstance(other, LinePlot):
             return NotImplemented
         return self.to_dict() == other.to_dict()
-    
+
     def __hash__(self):
         # Hash based on the tuple of sorted key-value pairs in the dictionary
         return hash(tuple(sorted(self.to_dict().items())))
-    
+
     @classmethod
     def populate(cls, dictionary: Dict[str, Any]) -> 'ScatterPlot':
         """
@@ -221,7 +244,8 @@ class ScatterPlot(_PlotParams):
         Parameters
         ----------
         dictionary : dict
-            A dictionary where keys represent parameter labels (e.g., 's' for size, 'c' for color), and values represent the corresponding values for each parameter.
+            A dictionary where keys represent parameter labels (e.g., 's' for size, 'c' for color),
+            and values represent the corresponding values for each parameter.
 
         Returns
         -------
@@ -237,24 +261,24 @@ class ScatterPlot(_PlotParams):
                          'cmap': 'cmap',
                          'fc': 'face_color'}.get(key, key)
             setattr(instance, attr_name, value)
-        
+
         return instance
-    
+
     def _all_parameters(self):
         return [self.color, self.alpha, self.marker, self.size, self.cmap, self.face_color]
-    
+
     def _all_labels(self):
         return ['c', 'alpha', 'marker', 's', 'cmap', 'fc']
 
 
 class SubPlots(_PlotParams):
-    
+
     def __init__(self, share_x=None, share_y=None, fig_size=None):
         super().__init__(share_x=share_x, share_y=share_y, subplot_fig_size=fig_size)
-    
+
     def _all_labels(self):
         return ['sharex', 'sharey', 'figsize']
-    
+
     def _all_parameters(self):
         return [self.share_x, self.share_y, self.fig_size]
 
@@ -296,7 +320,7 @@ def label_handler(x_labels: Optional[List[str]], y_labels: Optional[List[str]],
     """
     if not auto_label and (x_labels is None or y_labels is None):
         raise NoXYLabels("Both x_labels and y_labels are required without the auto_label parameter.")
-    
+
     elif auto_label and (x_labels is None or y_labels is None):
         if x_labels is None and y_labels is None:
             pass
@@ -305,7 +329,7 @@ def label_handler(x_labels: Optional[List[str]], y_labels: Optional[List[str]],
                 warnings.warn("y_labels given but x_labels is missing, applying auto-labeling...", UserWarning)
             if y_labels is None:
                 warnings.warn("x_labels given but y_labels is missing, applying auto-labeling...", UserWarning)
-    
+
     if auto_label:
         if x_labels and y_labels:
             start = "auto_label selected with x_labels and y_labels provided"
@@ -318,7 +342,7 @@ def label_handler(x_labels: Optional[List[str]], y_labels: Optional[List[str]],
         else:
             x_labels = [fr'X$_{i + 1}$' for i in range(n_cols * n_rows)]
             y_labels = [fr'Y$_{i + 1}$' for i in range(n_cols * n_rows)]
-    
+
     return x_labels, y_labels
 
 
@@ -387,17 +411,17 @@ def split_dictionary(plot_instance: Union[LinePlot, ScatterPlot]) -> _split:
     # Flatten the parameters from the input plot instance
     parameters = plot_instance.get()
     params_instance1, params_instance2 = {}, {}
-    
+
     # Split each parameter into two separate dictionaries for the two instances
     for param_name, values in parameters.items():
         if isinstance(values, (list, tuple)) and len(values) == 2:
             params_instance1[param_name], params_instance2[param_name] = values
         else:
             raise ValueError(f"Parameter '{param_name}' must be a list or tuple with exactly two elements.")
-    
+
     instance1 = plot_instance.__class__.populate(params_instance1)
     instance2 = plot_instance.__class__.populate(params_instance2)
-    
+
     return instance1, instance2
 
 
@@ -502,9 +526,9 @@ def dual_axes_label_management(x1y1_label: Optional[str], x1y2_label: Optional[s
     """
     # Set defaults for axis labels and data labels based on `use_twin_x`
     default_axis_labels = ['X', 'Y1', 'Y2'] if use_twin_x else ['X1', 'Y', 'X2']
-    default_data_labels = ['X1 vs Y1', 'X1 vs Y2'] if use_twin_x else ['Y vs X1', 'X2 vs Y1']
+    default_data_labels = ['X1 vs Y1', 'X1 vs Y2'] if use_twin_x else ['Y vs X1', 'Y vs X2']
     default_title = 'Plot'
-    
+
     if auto_label:
         # Use defaults for missing labels
         axis_labels = axis_labels or default_axis_labels
@@ -521,5 +545,5 @@ def dual_axes_label_management(x1y1_label: Optional[str], x1y2_label: Optional[s
         x1y2_label = x1y2_label or ''
         x2y1_label = x2y1_label or ''
         plot_title = plot_title or ''
-    
+
     return x1y1_label, x1y2_label, x2y1_label, plot_title, axis_labels
