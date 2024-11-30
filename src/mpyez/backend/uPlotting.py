@@ -152,7 +152,7 @@ class LinePlot(_PlotParams):
                          alpha=alpha, marker=marker, marker_size=marker_size,
                          marker_edge_color=marker_edge_color, marker_face_color=marker_face_color,
                          marker_edge_width=marker_edge_width)
-        self.color = get_color()
+        self.color = color or get_color()
 
     def __repr__(self):
         param_str = ', '.join(f"{key}={value!r}" for key, value in self.to_dict().items())
@@ -221,7 +221,7 @@ class ScatterPlot(_PlotParams):
         super().__init__(color=color, alpha=alpha, marker=marker, size=size, cmap=cmap, face_color=face_color)
 
         if self.color is None:
-            self.color = get_color()
+            self.color = color or get_color()
 
     def __repr__(self):
         param_str = ', '.join(f"{key}={value!r}" for key, value in self.to_dict().items())
