@@ -1,4 +1,4 @@
 [build-system]
-requires = ["setuptools", "numpy==1.26.4", "matplotlib"]
+requires = ["setuptools", "numpy==2.1.3", "matplotlib"]
 
 build-backend = "setuptools.build_meta:__legacy__"
