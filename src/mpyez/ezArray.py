@@ -82,26 +82,9 @@ def evaluate_with_broadcast(func, constant_array, **param_arrays):
     ndarray
         The result of the function evaluation. The shape of the result is `(len(constant_array), ...)`,
         where the additional dimensions correspond to the shapes of the parameter arrays.
-
-    Examples
-    --------
-    Evaluate a sine wave function over time with varying frequencies and amplitudes:
-
-    >>> import numpy as np
-    >>> def sine_wave(t, f, a):
-    ...     return a * np.sin(2 * np.pi * f * t)
-    >>> time = np.linspace(0, 1, 100)
-    >>> frequencies = np.array([1, 2, 3])
-    >>> amplitudes = np.array([0.5, 1.0, 1.5])
-    >>> result = evaluate_with_broadcast(sine_wave, time, f=frequencies, a=amplitudes)
-    >>> result.shape
-    (100, 3)
     """
-    # Expand constant_array to add a broadcastable dimension
+    # Expand constant_array to add a broadcast dimension
     expanded_constant = constant_array[:, np.newaxis]
+    params_ = {key: value[np.newaxis, :] for key, value in param_arrays.items()}
 
-    # Expand all parameter arrays
-    broadcasted_params = {key: value[np.newaxis, :] for key, value in param_arrays.items()}
-
-    # Evaluate the function using broadcasting
-    return func(expanded_constant, **broadcasted_params)
+    return func(expanded_constant, **params_)
