@@ -1,4 +1,4 @@
-"""Created on Jul 23 23:41:18 2024"""
+"""Created on Jul 23 23:41:18 2024."""
 
 __all__ = ['plot_two_column_file', 'plot_xy', 'plot_xyy', 'plot_with_dual_axes', 'two_subplots', 'n_plotter']
 
@@ -27,7 +27,7 @@ def plot_two_column_file(file_name: str,
                          plot_dictionary: Optional[plot_dictionary_type] = None,
                          axis: Optional[Axes] = None) -> axis_return:
     """
-    Reads a two-column file (x, y) and plots the data.
+    Read a two-column file (x, y) and plots the data.
 
     This function reads a file containing two columns (e.g., x and y values) and plots them
     using either a line plot or scatter plot based on the user's preference.
@@ -47,7 +47,7 @@ def plot_two_column_file(file_name: str,
     is_scatter : bool, optional
         If True, creates a scatter plot. Otherwise, creates a line plot. Default is False.
     plot_dictionary: Union[LinePlot, ScatterPlot], optional
-        An object representing the plot data, either a `LinePlot` or `ScatterPlot`,  to be passed to the matplotlib plotting library.
+        An object representing the plot data, either a `LinePlot` or `ScatterPlot`, to be passed to the matplotlib plotting library.
          If None, a default plot type will be used.
     axis: Optional[Axes]
         The axis object to draw the plots on. If not passed, a new axis object will be created internally.
@@ -77,7 +77,7 @@ def plot_xy(x_data: np.ndarray, y_data: np.ndarray,
             plot_dictionary: Optional[plot_dictionary_type] = None,
             axis: Optional[Axes] = None) -> axis_return:
     """
-    Plots x_data against y_data with customizable options.
+    Plot the x_data against y_data with customizable options.
 
     This function accepts two arrays of data (x and y) and plots them using either
     a line plot or scatter plot, with options for labels and figure size.
@@ -189,7 +189,7 @@ def plot_with_dual_axes(x1_data: np.ndarray, y1_data: np.ndarray,
                         plot_dictionary: Optional[plot_dictionary_type] = None,
                         axis: Optional[Axes] = None) -> axis_return:
     """
-    Plots data with options for dual axes (x or y) or single axis.
+    Plot the data with options for dual axes (x or y) or single axis.
 
     Parameters
     ----------
@@ -295,7 +295,7 @@ def two_subplots(x_data: List[np.ndarray], y_data: List[np.ndarray],
                  subplot_dictionary: Optional[uPl.SubPlots] = None,
                  plot_dictionary: Optional[Union[uPl.LinePlot, uPl.ScatterPlot]] = None) -> None:
     """
-    Creates two subplots arranged horizontally or vertically, with optional customization.
+    Create two subplots arranged horizontally or vertically, with optional customization.
 
     This function internally calls `n_plotter` to handle the plotting of each subplot.
     `n_plotter` arranges the subplots and applies relevant plot and subplot dictionaries.
@@ -359,7 +359,7 @@ def n_plotter(x_data: List[np.ndarray], y_data: List[np.ndarray],
               subplot_dictionary: Optional[uPl.SubPlots] = None,
               plot_dictionary: Optional[Union[uPl.LinePlot, uPl.ScatterPlot]] = None) -> Union[plt.figure, Axes]:
     """
-    Plots multiple subplots in a grid with optional customization for each subplot.
+    Plot multiple subplots in a grid with optional customization for each subplot.
 
     Parameters
     ----------
