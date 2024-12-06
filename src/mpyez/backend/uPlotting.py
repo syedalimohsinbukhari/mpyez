@@ -233,7 +233,6 @@ class ScatterPlot(_PlotParams):
         return self.to_dict() == other.to_dict()
 
     def __hash__(self):
-        # Hash based on the tuple of sorted key-value pairs in the dictionary
         return hash(tuple(sorted(self.to_dict().items())))
 
     @classmethod
