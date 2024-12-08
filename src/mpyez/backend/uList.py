@@ -2,86 +2,224 @@
 
 from copy import deepcopy
 from itertools import compress
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 from . import eList as eL
-from .eList import GotAnUnknownValue, IndexOutOfList, UnequalElements
 
 
-def equalizing_list_length(primary_list, secondary_list, names):
-    primary_len = len(primary_list)
-    secondary_len = len(secondary_list)
+def equalizing_list_length(primary_list: List, secondary_list: List) -> List:
+    """
+    Adjusts the length of the secondary list to match the length of the primary list.
 
-    if secondary_len > primary_len:
-        raise UnequalElements(f'The number of elements in the {names[0]} list is greater than that of {names[1]}. '
-                              f'Cannot perform replacement in this case.')
-    elif secondary_len < primary_len:
-        secondary_list += secondary_list[:primary_len - secondary_len]
+    If the secondary list is shorter, it is extended by repeating its elements cyclically.
+    If the secondary list is longer, an error is raised.
+
+    Parameters
+    ----------
+    primary_list : list
+        The reference list whose length needs to be matched.
+    secondary_list : list
+        The list to be adjusted to the length of the primary list.
+
+    Returns
+    -------
+    list
+        The adjusted secondary list, with a length equal to the primary list.
+
+    Raises
+    ------
+    UnequalElements
+        If the secondary list has more elements than the primary list.
+    """
+    primary_length = len(primary_list)
+    secondary_length = len(secondary_list)
+
+    if secondary_length > primary_length:
+        raise eL.UnequalElements(f"The secondary list ({secondary_length} elements) is longer than the primary list ({primary_length} elements).")
+    elif secondary_length < primary_length:
+        # Extend secondary_list cyclically to match the length of primary_list
+        secondary_list += secondary_list[:primary_length - secondary_length]
 
     return secondary_list
 
 
-def replace_at_index(input_list, index, value, new_list=False):
-    index, value = map(lambda x: [x] if not isinstance(x, list) else x, (index, value))
-    value += value[:len(index) - len(value)]
+def replace_at_index(input_list: List, index: Union[int, List[int]], value: Union[Any, List[Any]], new_list: bool = False) -> List:
+    """
+    Replaces elements in a list at specified indices with new values.
 
-    for i, v in zip(index, value):
-        if i > len(input_list) - 1:
-            raise IndexOutOfList(f'Index {i} is out of bound for a list of length {len(input_list)}.')
+    Parameters
+    ----------
+    input_list : list
+        The original list whose elements need to be replaced.
+    index : int or list of int
+        The index or indices of the elements to replace.
+    value : any or list of any
+        The new value(s) to insert at the specified index/indices.
+    new_list : bool, optional
+        If True, returns a modified copy of the original list. If False, modifies
+        the list in place (default is False).
 
+    Returns
+    -------
+    list
+        The modified list with replaced values.
+
+    Raises
+    ------
+    IndexOutOfList
+        If any index in `index` is out of bounds for the input list.
+    ValueError
+        If the number of indices does not match the number of values.
+
+    Examples
+    --------
+    >>> input_ = [1, 2, 3, 4]
+    >>> replace_at_index(input_, [1, 3], [9, 10])
+    [1, 9, 3, 10]
+
+    >>> replace_at_index([1, 2, 3, 4], 2, 99)
+    [1, 2, 99, 4]
+    """
+    # Ensure index and value are lists for uniform processing
+    index = [index] if not isinstance(index, list) else index
+    value = [value] if not isinstance(value, list) else value
+
+    # Check if the number of indices matches the number of values
+    if len(index) != len(value):
+        raise ValueError(f"The number of indices ({len(index)}) must match the number of values ({len(value)}).")
+
+    # Validate indices are within bounds
+    for i in index:
+        if i >= len(input_list) or i < 0:
+            raise eL.IndexOutOfList(f"Index {i} is out of bounds for a list of length {len(input_list)}.")
+
+    # Create a new list if requested
     if new_list:
-        input_list = input_list[:]
+        input_list = deepcopy(input_list)
 
+    # Replace elements at the specified indices
     for i, v in zip(index, value):
         input_list[i] = v
 
     return input_list
 
 
-def replace_element(input_list, old_element, new_element, new_list=False):
-    old_element, new_element = map(lambda x: [x] if not isinstance(x, list) else x, (old_element, new_element))
-    new_element += new_element[:len(old_element) - len(new_element)]
+def replace_element(input_list: List[Union[int, float, str]],
+                    old_elements: Union[List[Union[int, float, str]], Union[int, float, str]],
+                    new_elements: Union[List[Union[int, float, str]], Union[int, float, str]],
+                    new_list: bool = False) -> List[Union[int, float, str]]:
+    """
+    Replaces elements in a list with new values at corresponding indices.
 
-    index = []
-    for i, old in enumerate(old_element):
+    Parameters
+    ----------
+    input_list : list of int, float, or str
+        The original list in which elements will be replaced.
+    old_elements : int, float, str, or list of int, float, str
+        The element(s) to be replaced in the input_list.
+    new_elements : int, float, str, or list of int, float, str
+        The new value(s) to replace the old_elements.
+    new_list : bool, optional
+        If True, returns a modified copy of the original list. If False, modifies
+        the list in place (default is False).
+
+    Returns
+    -------
+    list of int, float, or str
+        The modified list with the replaced elements.
+
+    Raises
+    ------
+    GotAnUnknownValue
+        If any value in old_elements does not exist in the input_list.
+    UnequalElements
+        If old_elements and new_elements lists have different lengths.
+
+    Notes
+    -----
+    - The lengths of old_elements and new_elements must match if they are provided as lists.
+    - If a single element is provided in old_elements or new_elements, it will be applied to all occurrences of old_elements in input_list.
+    """
+    if not isinstance(old_elements, list):
+        old_elements = [old_elements]
+    if not isinstance(new_elements, list):
+        new_elements = [new_elements]
+
+    if len(old_elements) != len(new_elements):
+        raise eL.UnequalElements(f'The number of elements in old_elements ({len(old_elements)}) does not match '
+                                 f'the number of elements in new_elements ({len(new_elements)}).')
+
+    indices = []
+    for old in old_elements:
         if old not in input_list:
-            raise GotAnUnknownValue(f'The value {old} given in old_element does not exist in the input_list.')
-        index.append(input_list.index(old))
+            raise eL.GotAnUnknownValue(f'The value {old} given in old_elements does not exist in the input_list.')
+        indices.append(input_list.index(old))
 
     if new_list:
         input_list = input_list[:]
 
-    for i, new in zip(index, new_element):
+    for i, new in zip(indices, new_elements):
         input_list[i] = new
 
     return input_list
 
 
 class CountObjectsInList:
+    """Class to count objects in the given list."""
 
-    def __init__(self, counter_dict):
+    def __init__(self, counter_dict: Dict[Union[str, int], int]):
+        """
+        Initialize the CountObjectsInList with a dictionary containing items and their counts.
+
+        Parameters
+        ----------
+        counter_dict : dict
+            A dictionary where keys are items (could be strings or other types),
+            and values are their corresponding counts.
+        """
         self.counter_dict = counter_dict
         self.__counter_dict = sorted(self.counter_dict.items(), key=lambda x: x[1], reverse=True)
 
-        self.counter = 0
+    def __str__(self) -> str:
+        """Return a formatted string representing the counts of the objects in the list. The items and their counts are displayed in a table format.
 
-    def __str__(self):
+        Returns
+        -------
+        str
+            A string representation of the object with formatted counts.
+        """
         out = '-' * 50 + '\n'
         out += f'|{"items":^30}|{"counts":^17}|\n'
         out += '-' * 50 + '\n'
-        out += '\n'.join([f'|{key:^30}|{value:^17}|'
-                          if not isinstance(key, str)
-                          else f"|\'{key}\':^30|{value:^17}|"
-                          for key, value in self.counter_dict.items()]) + '\n'
+
+        for key, value in self.counter_dict.items():
+            if isinstance(key, str):
+                out += f"|\'{key}\':^30|{value:^17}|\n"
+            else:
+                out += f"|{key:^30}|{value:^17}|\n"
         out += '-' * 50 + '\n'
         return out
 
-    def __getitem__(self, item):
-        _get = self.__counter_dict[item]
-        try:
-            return CountObjectsInList({element[0]: element[1] for element in _get})
-        except TypeError:
-            return CountObjectsInList({_get[0]: _get[1]})
+    def __getitem__(self, item: int) -> 'CountObjectsInList':
+        """
+        Retrieve a specific item from the sorted counter list and return a new CountObjectsInList instance.
+
+        Parameters
+        ----------
+        item : int
+            The index of the item in the sorted counter list.
+
+        Returns
+        -------
+        CountObjectsInList
+            A new CountObjectsInList instance with the corresponding item and its count.
+        """
+        if item < 0 or item >= len(self.__counter_dict):
+            raise IndexError("Index out of bounds.")
+
+        selected_item = self.__counter_dict[item]
+
+        return CountObjectsInList({selected_item[0]: selected_item[1]})
 
 
 def numeric_list_to_string(num_list: List[int]) -> List[str]:

@@ -2,10 +2,24 @@
 
 
 class EzFileErrs(Exception):
-    """Base class for exceptions in EzFile."""
+    """
+    Base class for exceptions in EzFile.
+
+    Notes
+    -----
+    This serves as the base class for all exceptions related to file operations
+    in the EzFile module. Specific exceptions should inherit from this class.
+    """
     pass
 
 
 class LineNumberOutOfBounds(EzFileErrs):
-    """Exception raised when a line number is out of bounds."""
+    """
+    Raised when a specified line number is out of the bounds of the file.
+
+    Notes
+    -----
+    This error occurs when an operation attempts to access a line number
+    that exceeds the number of lines in the file or is less than 1.
+    """
     pass

@@ -1,7 +1,7 @@
 """Created on Nov 02 21:24:07 2024"""
 
 __name__ = 'mpyez'
-__version__ = "0.0.9"
+__version__ = "0.1.0"
 __author__ = "Syed Ali Mohsin Bukhari"
 __email__ = "syedali.b@outlook.com"
 __license__ = "MIT"
