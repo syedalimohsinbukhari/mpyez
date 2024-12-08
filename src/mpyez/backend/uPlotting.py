@@ -1,15 +1,12 @@
 """Created on Oct 29 09:33:06 2024"""
 
-__all__ = ['LinePlot', 'ScatterPlot', 'SubPlots', 'label_handler', 'plot_or_scatter', 'plot_dictionary_handler',
-           'split_dictionary', 'dual_axes_data_validation', 'dual_axes_label_management']
+__all__ = ['LinePlot', 'ScatterPlot', 'SubPlots', 'plot_or_scatter', 'plot_dictionary_handler', 'split_dictionary', 'dual_axes_data_validation',
+           'dual_axes_label_management']
 
-import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from matplotlib import pyplot as plt, rcParams
-
-from .ePlotting import NoXYLabels
 
 
 def get_color():
@@ -282,69 +279,6 @@ class SubPlots(_PlotParams):
         return [self.share_x, self.share_y, self.fig_size]
 
 
-def label_handler(x_labels: Optional[List[str]], y_labels: Optional[List[str]],
-                  n_rows: int, n_cols: int, auto_label: bool) -> Tuple[List[str], List[str]]:
-    """
-    Handles the generation or validation of x and y labels for a subplot configuration.
-
-    Parameters
-    ----------
-    x_labels : list of str or None
-        The labels for the x-axis. If `None`, labels may be auto-generated based on `auto_label`.
-    y_labels : list of str or None
-        The labels for the y-axis. If `None`, labels may be auto-generated based on `auto_label`.
-    n_rows : int
-        Number of rows in the subplot grid.
-    n_cols : int
-        Number of columns in the subplot grid.
-    auto_label : bool
-        If `True`, generates x and y labels automatically when not provided.
-
-    Returns
-    -------
-    Tuple[List[str], List[str]]
-        The x and y labels for the subplot grid.
-
-    Raises
-    ------
-    NoXYLabels
-        If both `x_labels` and `y_labels` are `None` and `auto_label` is `False`.
-
-    Warnings
-    --------
-    UserWarning
-        If one of `x_labels` or `y_labels` is missing when `auto_label` is enabled, or if
-        there is a mismatch in the number of provided labels.
-
-    """
-    if not auto_label and (x_labels is None or y_labels is None):
-        raise NoXYLabels("Both x_labels and y_labels are required without the auto_label parameter.")
-
-    elif auto_label and (x_labels is None or y_labels is None):
-        if x_labels is None and y_labels is None:
-            pass
-        else:
-            if x_labels is None:
-                warnings.warn("y_labels given but x_labels is missing, applying auto-labeling...", UserWarning)
-            if y_labels is None:
-                warnings.warn("x_labels given but y_labels is missing, applying auto-labeling...", UserWarning)
-
-    if auto_label:
-        if x_labels and y_labels:
-            start = "auto_label selected with x_labels and y_labels provided"
-            if len(x_labels) != n_rows * n_cols or len(y_labels) != n_rows * n_cols:
-                warnings.warn(f"{start}, mismatch found, using auto-generated labels...", UserWarning)
-                x_labels = [fr'X$_{i + 1}$' for i in range(n_cols * n_rows)]
-                y_labels = [fr'Y$_{i + 1}$' for i in range(n_cols * n_rows)]
-            else:
-                print(f"{start}, using user-provided labels...")
-        else:
-            x_labels = [fr'X$_{i + 1}$' for i in range(n_cols * n_rows)]
-            y_labels = [fr'Y$_{i + 1}$' for i in range(n_cols * n_rows)]
-
-    return x_labels, y_labels
-
-
 def plot_or_scatter(axes: plt.axis, scatter: bool):
     """
     Returns the plot or scatter method based on the specified plot type.
@@ -413,10 +347,7 @@ def split_dictionary(plot_instance: Union[LinePlot, ScatterPlot]) -> _split:
 
     # Split each parameter into two separate dictionaries for the two instances
     for param_name, values in parameters.items():
-        if isinstance(values, (list, tuple)) and len(values) == 2:
-            params_instance1[param_name], params_instance2[param_name] = values
-        else:
-            raise ValueError(f"Parameter '{param_name}' must be a list or tuple with exactly two elements.")
+        params_instance1[param_name], params_instance2[param_name] = values[:2]
 
     instance1 = plot_instance.__class__.populate(params_instance1)
     instance2 = plot_instance.__class__.populate(params_instance2)
